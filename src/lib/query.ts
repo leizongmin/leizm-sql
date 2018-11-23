@@ -5,6 +5,7 @@
  */
 
 import * as assert from "assert";
+import * as utils from "./utils";
 
 export interface QueryOptionsParams {
   /**
@@ -48,6 +49,13 @@ export type DataRow = Record<string, any>;
 
 export class QueryBuilder<Q = DataRow, R = any> {
   //////////////////////////////////////////////////////////////////////////////
+
+  /**
+   * 创建新Query，设置表名
+   */
+  public static table<Q = DataRow, R = any>(name: string): QueryBuilder<Q, R> {
+    return new QueryBuilder().table(name);
+  }
 
   /**
    * 更新
