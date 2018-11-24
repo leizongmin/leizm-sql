@@ -343,7 +343,7 @@ export class QueryBuilder<Q = DataRow, R = any> {
         // 如果是更改操作，检查 condition 不能为空
         assert.ok(Object.keys(condition).length > 0, `condition for modify operation cannot be empty`);
       }
-      this._data.conditions = this._data.conditions.concat(utils.sqlConditionStrings(this, condition as any));
+      this._data.conditions = this._data.conditions.concat(utils.sqlConditionStrings(condition as any));
     }
     return this;
   }
@@ -460,7 +460,7 @@ export class QueryBuilder<Q = DataRow, R = any> {
       this._data.update.push(this.format(update, values || []));
     } else {
       let update2 = update as Record<string, any>;
-      const sql = utils.sqlUpdateString(this, update2);
+      const sql = utils.sqlUpdateString(update2);
       if (sql) {
         this._data.update.push(sql);
       }

@@ -1,6 +1,14 @@
 import * as assert from "assert";
+import * as sqlstring from "sqlstring";
 
-export function sqlFormat(tpl: string, values: any[]): string {}
+/**
+ * 格式化SQL字符串
+ * @param tpl 模板字符串
+ * @param values 模板变量
+ */
+export function sqlFormat(tpl: string, values: any[]): string {
+  return sqlstring.format(tpl, values);
+}
 
 /**
  * 返回格式化后的 SQL 语句
@@ -29,24 +37,40 @@ export function sqlFormatObject(sql: string, values: Record<string, any>, disabl
   });
 }
 
-export function sqlEscape(str: string): string {}
+/**
+ * 转义SQL值
+ * @param value 值
+ */
+export function sqlEscape(value: string): string {
+  return sqlstring.escape(value);
+}
 
-export function sqlEscapeId(str: string): string {}
+/**
+ * 转义SQL标识符
+ * @param value 标识符
+ */
+export function sqlEscapeId(value: string): string {
+  return sqlstring.escapeId(value);
+}
 
-export function findKeysForUndefinedValue(data: Record<string, any>): string[] {}
+/**
+ * 查找值为undefined的key列表
+ * @param data
+ */
+export function findKeysForUndefinedValue(data: Record<string, any>): string[] {
+  return Object.keys(data).filter(k => typeof data[k] === "undefined");
+}
 
 /**
  * 返回根据对象生成的 SQL UPDATE 语句
- * @param self QueryBuilder实例
  * @param data 键值对对象
  */
-export function sqlUpdateString(self: QueryBuilder, data: Record<string, any>): string {
+export function sqlUpdateString(data: Record<string, any>): string {
   return Object.keys(data)
     .map(name => {
       const info = data[name];
-      const isJsonField = self._schema && self._schema.isJsonField(name);
       const escapedName = sqlEscapeId(name);
-      if (info && typeof info === "object" && Object.keys(info).length === 1 && !isJsonField) {
+      if (info && typeof info === "object" && Object.keys(info).length === 1) {
         const op = Object.keys(info)[0];
         switch (op) {
           case "$incr":
@@ -66,13 +90,12 @@ export function sqlUpdateString(self: QueryBuilder, data: Record<string, any>): 
  * @param self QueryBuilder实例
  * @param condition 查询条件
  */
-export function sqlConditionStrings(self: QueryBuilder, condition: Record<string, any>): string[] {
+export function sqlConditionStrings(condition: Record<string, any>): string[] {
   const ret: string[] = [];
   for (const name in condition as any) {
     const info = (condition as any)[name];
-    const isJsonField = self._schema && self._schema.isJsonField(name);
     const escapedName = sqlEscapeId(name);
-    if (info && typeof info === "object" && Object.keys(info).length === 1 && !isJsonField) {
+    if (info && typeof info === "object" && Object.keys(info).length === 1) {
       const op = Object.keys(info)[0];
       switch (op) {
         case "$in":

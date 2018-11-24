@@ -8,7 +8,27 @@
     "dist/lib"
   ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "compile": "rm -rf dist && tsc",
+    "test": "jest",
+    "test-cov": "jest --coverage",
+    "test-debug": "export DEBUG='@leizm/sql:*' && jest",
+    "coveralls": "cat ./coverage/lcov.info | coveralls",
+    "format": "prettier --write 'src/**/*.ts'",
+    "prepublish": "npm run test && npm run compile"
+  },
+  "jest": {
+    "transform": {
+      "^.+\\.tsx?$": "ts-jest"
+    },
+    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(tsx?)$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json",
+      "node"
+    ]
   },
   "repository": {
     "type": "git",
@@ -28,8 +48,17 @@
   },
   "devDependencies": {
     "@types/chai": "^4.1.7",
+    "@types/debug": "0.0.31",
     "@types/mocha": "^5.2.5",
+    "@types/sqlstring": "^2.2.0",
     "chai": "^4.2.0",
-    "mocha": "^5.2.0"
+    "debug": "^4.1.0",
+    "jest": "^23.6.0",
+    "prettier": "^1.15.2",
+    "ts-jest": "^23.10.5",
+    "typescript": "^3.1.6"
+  },
+  "dependencies": {
+    "sqlstring": "^2.3.1"
   }
 }
