@@ -57,7 +57,47 @@ Q.select()
   .limit(3)
   .build();
 // SELECT `A`.*, `B`.* FROM `hello` AS `A` LEFT JOIN `world` AS `B` ON A.id=B.id WHERE 1 AND 2 LIMIT 2,3
+
+Q.table("test1")
+  .insert({
+    a: 123,
+    b: 456,
+  })
+  .build();
+// INSERT INTO `test1` (`a`, `b`) VALUES (123, 456);
+
+Q.table("test1")
+  .insert([
+    {
+      a: 123,
+      b: 456,
+    },
+    {
+      a: 789,
+      b: 110,
+    },
+  ])
+  .build();
+// INSERT INTO `test1` (`a`, `b`) VALUES (123, 456),
+// (789, 110)");
+
+Q.table("test1")
+  .update({
+    a: 123,
+    b: 456,
+  })
+  .where({
+    b: 777,
+  })
+  .limit(12)
+  .build();
+// UPDATE `test1` SET `a`=123, `b`=456 WHERE `b`=777 LIMIT 12
 ```
+
+详细是要方法可以参考单元测试：
+
+- https://github.com/leizongmin/leizm-sql/blob/master/src/test/query1.test.ts
+- https://github.com/leizongmin/leizm-sql/blob/master/src/test/query2.test.ts
 
 ## License
 
