@@ -1,5 +1,5 @@
 import * as assert from "assert";
-import * as sqlstring from "sqlstring";
+import * as SqlString from "sqlstring";
 
 /**
  * 格式化SQL字符串
@@ -7,7 +7,7 @@ import * as sqlstring from "sqlstring";
  * @param values 模板变量
  */
 export function sqlFormat(tpl: string, values: any[]): string {
-  return sqlstring.format(tpl, values);
+  return SqlString.format(tpl, values);
 }
 
 /**
@@ -42,7 +42,7 @@ export function sqlFormatObject(sql: string, values: Record<string, any>, disabl
  * @param value 值
  */
 export function sqlEscape(value: string): string {
-  return sqlstring.escape(value);
+  return SqlString.escape(value);
 }
 
 /**
@@ -50,7 +50,7 @@ export function sqlEscape(value: string): string {
  * @param value 标识符
  */
 export function sqlEscapeId(value: string): string {
-  return sqlstring.escapeId(value);
+  return SqlString.escapeId(value);
 }
 
 /**
