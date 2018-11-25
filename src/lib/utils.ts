@@ -14,7 +14,7 @@ export function isQueryBuilder(query: any): boolean {
  * @param tpl 模板字符串
  * @param values 模板变量
  */
-export function sqlFormat(tpl: string, values: any[]): string {
+export function sqlFormat(tpl: string, values: any[] = []): string {
   values = values.slice();
   let index = -1;
   tpl = tpl.replace(/\?+/g, (text, pos) => {
@@ -24,15 +24,17 @@ export function sqlFormat(tpl: string, values: any[]): string {
 
     if (typeof v === "string") {
       values.splice(index, 1);
+      index--;
       return v;
     }
     if (isQueryBuilder(v)) {
       const sql = v.build();
       assert.equal(typeof sql, "string", `sqlFormat: values[${index}].build() must returns a string`);
       values.splice(index, 1);
+      index--;
       return `(${sql})`;
     }
-    throw new Error("sqlFormat: value for ??? must be a string or QueryBuilder instance");
+    throw new Error(`sqlFormat: values[${index}] for ??? must be a string or QueryBuilder instance but got ${v}`);
   });
   return SqlString.format(tpl, values);
 }
@@ -44,8 +46,7 @@ export function sqlFormat(tpl: string, values: any[]): string {
  * @param values 参数对象
  * @param disable$ 是否没有 $ 开头的 key
  */
-export function sqlFormatObject(sql: string, values: Record<string, any>, disable$?: boolean): string {
-  values = values || {};
+export function sqlFormatObject(sql: string, values: Record<string, any> = {}, disable$: boolean = false): string {
   return sql.replace(/:((:){0,2}[\w$]+)/g, (txt, key) => {
     let type = "value";
     let name = key;
@@ -70,7 +71,9 @@ export function sqlFormatObject(sql: string, values: Record<string, any>, disabl
             assert.equal(typeof sql, "string", `sqlFormatObject: values["${name}"].build() must returns a string`);
             return `(${sql})`;
           }
-          throw new Error(`sqlFormatObject: value for :::${name} must be a string or QueryBuilder instance`);
+          throw new Error(
+            `sqlFormatObject: value for :::${name} must be a string or QueryBuilder instance but got ${values[name]}`,
+          );
         default:
           return sqlEscape(values[name]);
       }
@@ -134,10 +137,18 @@ export function sqlUpdateString(data: Record<string, any>): string {
  */
 export function sqlConditionStrings(condition: Record<string, any>): string[] {
   const ret: string[] = [];
+  const isPureConditionObject = (info: any) => {
+    if (info && typeof info === "object") {
+      const keys = Object.keys(info);
+      return keys.length > 0 && keys.filter(v => v[0] === "$").length === keys.length;
+    }
+    return false;
+  };
+
   for (const name in condition as any) {
     const info = (condition as any)[name];
     const escapedName = sqlEscapeId(name);
-    if (info && typeof info === "object" && Object.keys(info).length === 1) {
+    if (isPureConditionObject(info)) {
       Object.keys(info).forEach(op => {
         switch (op) {
           case "$lt":
@@ -184,6 +195,7 @@ export function sqlConditionStrings(condition: Record<string, any>): string[] {
             } else {
               throw new Error(`value for condition type $notIn in field ${name} must be an array`);
             }
+            break;
           case "$like":
             assert.ok(typeof info.$like === "string", `value for condition type $like in ${name} must be a string`);
             ret.push(`${escapedName} LIKE ${sqlEscape(info.$like)}`);
