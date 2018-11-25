@@ -122,12 +122,6 @@ table("test1")
 // SELECT * FROM `test1` WHERE a=123 AND b IN (SELECT `id` FROM `test2` WHERE `id`<10 LIMIT 100)
 ```
 
-详细使用方法可以参考单元测试：
-
-- https://github.com/leizongmin/leizm-sql/blob/master/src/test/query1.test.ts
-- https://github.com/leizongmin/leizm-sql/blob/master/src/test/query2.test.ts
-- https://github.com/leizongmin/leizm-sql/blob/master/src/test/query3.test.ts
-
 ## License
 
 ```text
