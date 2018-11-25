@@ -207,8 +207,8 @@ export class QueryBuilder<Q = DataRow, R = any> {
    * @param aliasName 别名
    */
   protected setTableAlias(tableName: string, aliasName: string) {
-    assert.ok(!(tableName in this._data.tableAlias), `alias name "${name}" already registered`);
-    assert.ok(!(aliasName in this._data.tableAlias), `alias name "${name}" already registered`);
+    assert.ok(!(tableName in this._data.tableAlias), `alias name "${tableName}" already registered`);
+    assert.ok(!(aliasName in this._data.tableAlias), `alias name "${aliasName}" already registered`);
     this._data.tableAlias[aliasName] = tableName;
     this._data.tableAlias[tableName] = aliasName;
   }
