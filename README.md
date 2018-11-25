@@ -35,6 +35,7 @@ npm install @leizm/sql --save
 ```typescript
 import Q from "@leizm/sql";
 
+// 普通查询
 Q.select("a", "b")
   .from("test")
   .where({ a: 1 })
@@ -45,6 +46,7 @@ Q.select("a", "b")
   .build();
 // SELECT `a`, `b` FROM `test` WHERE `a`=1 AND `b`=2 ORDER BY b DESC LIMIT 10,5
 
+// 连表查询
 Q.select()
   .from("hello")
   .as("A")
@@ -58,6 +60,7 @@ Q.select()
   .build();
 // SELECT `A`.*, `B`.* FROM `hello` AS `A` LEFT JOIN `world` AS `B` ON A.id=B.id WHERE 1 AND 2 LIMIT 2,3
 
+// 插入数据
 Q.table("test1")
   .insert({
     a: 123,
@@ -66,6 +69,7 @@ Q.table("test1")
   .build();
 // INSERT INTO `test1` (`a`, `b`) VALUES (123, 456);
 
+// 批量插入数据
 Q.table("test1")
   .insert([
     {
@@ -81,6 +85,7 @@ Q.table("test1")
 // INSERT INTO `test1` (`a`, `b`) VALUES (123, 456),
 // (789, 110)");
 
+// 更新数据
 Q.table("test1")
   .update({
     a: 123,
@@ -92,6 +97,29 @@ Q.table("test1")
   .limit(12)
   .build();
 // UPDATE `test1` SET `a`=123, `b`=456 WHERE `b`=777 LIMIT 12
+
+// 删除数据
+Q.delete()
+  .from("test1")
+  .where({
+    b: 777,
+  })
+  .limit(12)
+  .build();
+// DELETE FROM `test1` WHERE `b`=777 LIMIT 12
+
+// 子查询
+Q.select("*")
+  .from("test1")
+  .where("a=? AND b IN ???", [
+    123,
+    Q.select("id")
+      .from("test2")
+      .where({ id: { $lt: 10 } })
+      .limit(100),
+  ])
+  .build();
+// SELECT * FROM `test1` WHERE a=123 AND b IN (SELECT `id` FROM `test2` WHERE `id`<10 LIMIT 100)
 ```
 
 详细是要方法可以参考单元测试：
