@@ -78,7 +78,7 @@ test("select", function() {
         a: 123,
         b: 456,
       })
-      .offset(10)
+      .skip(10)
       .build();
     utils.debug(sql);
     expect(sql).to.equal("SELECT `name`, `age` FROM `test1` WHERE `a`=123 AND `b`=456 LIMIT 10,18446744073709551615");
@@ -90,7 +90,7 @@ test("select", function() {
         a: 123,
         b: 456,
       })
-      .offset(10)
+      .skip(10)
       .limit(20)
       .build();
     utils.debug(sql);
@@ -414,7 +414,7 @@ test("options", function() {
     const sql = Q.table("test1")
       .select()
       .options({
-        skip: 1,
+        offset: 1,
         limit: 2,
         orderBy: "`id` DESC",
         groupBy: "`name`",

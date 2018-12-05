@@ -220,19 +220,19 @@ export function sqlConditionStrings(condition: Record<string, any>): string[] {
 
 /**
  * 返回生成 SQL LIMIT 语句
- * @param skip 跳过的行数
+ * @param offset 跳过的行数
  * @param limit 返回的行数
  */
-export function sqlLimitString(skip: number, limit: number): string {
-  skip = Number(skip);
+export function sqlLimitString(offset: number, limit: number): string {
+  offset = Number(offset);
   limit = Number(limit);
   if (limit > 0) {
-    if (skip > 0) {
-      return `LIMIT ${skip},${limit}`;
+    if (offset > 0) {
+      return `LIMIT ${offset},${limit}`;
     }
     return `LIMIT ${limit}`;
   }
-  return `LIMIT ${skip},18446744073709551615`;
+  return `LIMIT ${offset},18446744073709551615`;
 }
 
 /**

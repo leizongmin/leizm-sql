@@ -13,6 +13,10 @@ export interface QueryOptionsParams {
    */
   skip?: number;
   /**
+   * 跳过的行数
+   */
+  offset?: number;
+  /**
    * 返回的行数
    */
   limit?: number;
@@ -632,12 +636,15 @@ export class QueryBuilder<Q = DataRow, R = any> {
 
   /**
    * 批量设置 options
-   * @param options 选项，包含 { skip, limit, orderBy, groupBy, fields }
+   * @param options 选项，包含 { offset, limit, orderBy, groupBy, fields }
    */
   public options(options: QueryOptionsParams): this {
     assert.ok(options, `options must be an Object`);
     if (typeof options.skip !== "undefined") {
       this.offset(options.skip);
+    }
+    if (typeof options.offset !== "undefined") {
+      this.offset(options.offset);
     }
     if (typeof options.limit !== "undefined") {
       this.limit(options.limit);
@@ -736,6 +743,7 @@ export class QueryBuilder<Q = DataRow, R = any> {
               $limit: this._data.limit,
               $fields: this._data.fields,
               $skipRows: this._data.offsetRows,
+              $offsetRows: this._data.offsetRows,
               $limitRows: this._data.limitRows,
             },
             true,

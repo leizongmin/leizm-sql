@@ -41,7 +41,7 @@ table("test")
   .where({ a: 1 })
   .and("b=?", [2])
   .orderBy("b DESC")
-  .skip(10)
+  .offset(10)
   .limit(5)
   .build();
 // SELECT `a`, `b` FROM `test` WHERE `a`=1 AND `b`=2 ORDER BY b DESC LIMIT 10,5
@@ -55,7 +55,7 @@ table("hello")
   .on("A.id=B.id")
   .where("1")
   .and("2")
-  .skip(2)
+  .offset(2)
   .limit(3)
   .build();
 // SELECT `A`.*, `B`.* FROM `hello` AS `A` LEFT JOIN `world` AS `B` ON A.id=B.id WHERE 1 AND 2 LIMIT 2,3
