@@ -333,6 +333,37 @@ test("update", function() {
     expect(sql).to.equal("UPDATE `test1` SET `a`=456 WHERE `a`=123 LIMIT 456");
   }
 });
+
+test("insert or update", function() {
+  {
+    const sql = Q.table("test1")
+      .insert({ a: 123, b: 456 })
+      .onDuplicateKeyUpdate()
+      .set({ a: "xxx" })
+      .build();
+    utils.debug(sql);
+    expect(sql).to.equal("INSERT INTO `test1` (`a`, `b`) VALUES (123, 456) ON DUPLICATE KEY UPDATE `a`='xxx'");
+  }
+  {
+    expect(() =>
+      Q.table("test1")
+        .insert([{ a: 123, b: 456 }, { a: 111, b: 222 }])
+        .onDuplicateKeyUpdate()
+        .set({ a: "xxx" })
+        .build(),
+    ).throws("onDuplicateKeyUpdate() must inserted one row, but accutal is 2 rows");
+  }
+  {
+    expect(() =>
+      Q.table("test1")
+        .select("*")
+        .onDuplicateKeyUpdate()
+        .set({ a: "xxx" })
+        .build(),
+    ).throws("onDuplicateKeyUpdate() must be called after insert()");
+  }
+});
+
 test("delete", function() {
   {
     const sql = Q.table("test1")

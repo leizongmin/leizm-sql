@@ -101,6 +101,7 @@ export class QueryBuilder<Q = DataRow, R = any> {
     type: string;
     update: string[];
     insert: string;
+    insertRows: number;
     delete: string;
     sql: string;
     sqlTpl: string;
@@ -127,6 +128,7 @@ export class QueryBuilder<Q = DataRow, R = any> {
       type: "",
       update: [],
       insert: "",
+      insertRows: 0,
       delete: "",
       sql: "",
       sqlTpl: "",
@@ -457,7 +459,10 @@ export class QueryBuilder<Q = DataRow, R = any> {
 
   public set(update: Partial<Q> | Pick<AdvancedUpdate, keyof Q> | string, values?: DataRow | any[]): this {
     const t = typeof update;
-    assert.ok(this._data.type === "UPDATE", `query type must be UPDATE, please call .update() before`);
+    assert.ok(
+      this._data.type === "UPDATE" || this._data.type === "INSERT_OR_UPDATE",
+      `query type must be UPDATE, please call .update() before`,
+    );
     assert.ok(update, `missing update data`);
     assert.ok(t === "string" || t === "object", `first parameter must be a string or array`);
     if (typeof update === "string") {
@@ -494,7 +499,7 @@ export class QueryBuilder<Q = DataRow, R = any> {
       data = [data];
     }
 
-    let list: Array<DataRow> = data as Array<DataRow>;
+    const list: Array<DataRow> = data as Array<DataRow>;
     const originFields = Object.keys(list[0]);
     const fields = originFields.map(name => utils.sqlEscapeId(name));
     const values: string[] = [];
@@ -508,6 +513,7 @@ export class QueryBuilder<Q = DataRow, R = any> {
       values.push(`(${line.join(", ")})`);
     }
     this._data.insert = `(${fields.join(", ")}) VALUES ${values.join(",\n")}`;
+    this._data.insertRows = list.length;
     return this;
   }
 
@@ -517,6 +523,21 @@ export class QueryBuilder<Q = DataRow, R = any> {
   public delete(): this {
     assert.ok(this._data.type === "", `cannot change query type after it was set to "${this._data.type}"`);
     this._data.type = "DELETE";
+    return this;
+  }
+
+  /**
+   * 插入记录时如果键冲突，则改为更新
+   * ON DUPLICATE KEY UPDATE
+   * 用法：table("xx").insert(row).onDuplicateKeyUpdate().set(update)
+   */
+  public onDuplicateKeyUpdate(): this {
+    assert.ok(this._data.type === "INSERT", `onDuplicateKeyUpdate() must be called after insert()`);
+    assert.ok(
+      this._data.insertRows === 1,
+      `onDuplicateKeyUpdate() must inserted one row, but accutal is ${this._data.insertRows} rows`,
+    );
+    this._data.type = "INSERT_OR_UPDATE";
     return this;
   }
 
@@ -728,6 +749,10 @@ export class QueryBuilder<Q = DataRow, R = any> {
         sql = `UPDATE ${t} SET ${d.update.join(", ")} ${tail}`;
         break;
       }
+      case "INSERT_OR_UPDATE":
+        assert.ok(d.update.length > 0, `update data connot be empty`);
+        sql = `INSERT INTO ${t} ${d.insert} ON DUPLICATE KEY UPDATE ${d.update.join(", ")}`;
+        break;
       case "DELETE": {
         const tail = utils.joinMultiString(where, limit);
         sql = `DELETE FROM ${t} ${tail}`;
