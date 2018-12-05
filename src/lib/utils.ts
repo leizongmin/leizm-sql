@@ -245,3 +245,11 @@ export function joinMultiString(...strs: string[]): string {
     .filter(v => v)
     .join(" ");
 }
+
+/**
+ * 对象深拷贝
+ * @param data
+ */
+export function deepCopy<T = any>(data: T): T {
+  return JSON.parse(JSON.stringify(data));
+}

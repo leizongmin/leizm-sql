@@ -93,9 +93,9 @@ export class QueryBuilder<Q = DataRow, R = any> {
 
   //////////////////////////////////////////////////////////////////////////////
 
-  protected _tableName?: string;
-  protected _tableNameEscaped?: string;
   protected readonly _data: {
+    tableName?: string;
+    tableNameEscaped?: string;
     fields: string;
     conditions: string[];
     type: string;
@@ -144,6 +144,15 @@ export class QueryBuilder<Q = DataRow, R = any> {
       currentJoinTableName: "",
       joinTables: [],
     };
+  }
+
+  /**
+   * 克隆当前QueryBuilder
+   */
+  public clone(): QueryBuilder {
+    const q = new QueryBuilder();
+    (q as any)._data = utils.deepCopy(this._data);
+    return q;
   }
 
   /**
@@ -199,9 +208,9 @@ export class QueryBuilder<Q = DataRow, R = any> {
    * @param tableName 表名
    */
   public table(tableName: string): this {
-    assert.ok(!this._tableName, `cannot change table name after it's set to "${this._tableName}"`);
-    this._tableName = tableName;
-    this._tableNameEscaped = utils.sqlEscapeId(tableName);
+    assert.ok(!this._data.tableName, `cannot change table name after it's set to "${this._data.tableName}"`);
+    this._data.tableName = tableName;
+    this._data.tableNameEscaped = utils.sqlEscapeId(tableName);
     return this;
   }
 
@@ -241,7 +250,7 @@ export class QueryBuilder<Q = DataRow, R = any> {
    */
   public as(name: string): this {
     assert.ok(typeof name === "string", `first parameter must be a string`);
-    const tableName = this._data.currentJoinTableName || this._tableName!;
+    const tableName = this._data.currentJoinTableName || this._data.tableName!;
     this.setTableAlias(tableName, name);
     return this;
   }
@@ -687,8 +696,8 @@ export class QueryBuilder<Q = DataRow, R = any> {
    */
   public build(): string {
     const d = this._data;
-    const tn = this._tableName!;
-    const t = this._tableNameEscaped!;
+    const tn = d.tableName!;
+    const t = d.tableNameEscaped!;
     d.conditions = d.conditions.map(v => v.trim()).filter(v => v);
     const where = d.conditions.length > 0 ? `WHERE ${d.conditions.join(" AND ")}` : "";
     const limit = d.limit;
@@ -763,7 +772,7 @@ export class QueryBuilder<Q = DataRow, R = any> {
           utils.sqlFormatObject(
             d.sqlTpl,
             {
-              $table: this._tableNameEscaped,
+              $table: this._data.tableNameEscaped,
               $orderBy: this._data.orderBy,
               $limit: this._data.limit,
               $fields: this._data.fields,
