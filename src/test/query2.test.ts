@@ -63,7 +63,7 @@ test("leftJoin", function() {
       .on("A.id=B.id")
       .where("1")
       .and("2")
-      .skip(2)
+      .offset(2)
       .limit(3)
       .build();
     expect(sql).to.equal(
@@ -79,7 +79,7 @@ test("leftJoin", function() {
       .on("A.id=B.id")
       .where("1")
       .and("2")
-      .skip(2)
+      .offset(2)
       .limit(3)
       .build();
     expect(sql).to.equal(
@@ -93,7 +93,7 @@ test("leftJoin", function() {
       .on("hello.id=world.id")
       .where("1")
       .and("2")
-      .skip(2)
+      .offset(2)
       .limit(3)
       .build();
     expect(sql).to.equal(
@@ -112,7 +112,7 @@ test("rightJoin", function() {
       .on("A.id=B.id")
       .where("1")
       .and("2")
-      .skip(2)
+      .offset(2)
       .limit(3)
       .build();
     expect(sql).to.equal(
@@ -128,7 +128,7 @@ test("rightJoin", function() {
       .on("A.id=B.id")
       .where("1")
       .and("2")
-      .skip(2)
+      .offset(2)
       .limit(3)
       .build();
     expect(sql).to.equal(
@@ -142,7 +142,7 @@ test("rightJoin", function() {
       .on("hello.id=world.id")
       .where("1")
       .and("2")
-      .skip(2)
+      .offset(2)
       .limit(3)
       .build();
     expect(sql).to.equal(
@@ -161,7 +161,7 @@ test("join", function() {
       .on("A.id=B.id")
       .where("1")
       .and("2")
-      .skip(2)
+      .offset(2)
       .limit(3)
       .build();
     expect(sql).to.equal(
@@ -177,7 +177,7 @@ test("join", function() {
       .on("A.id=B.id")
       .where("1")
       .and("2")
-      .skip(2)
+      .offset(2)
       .limit(3)
       .build();
     expect(sql).to.equal(
@@ -191,7 +191,7 @@ test("join", function() {
       .on("hello.id=world.id")
       .where("1")
       .and("2")
-      .skip(2)
+      .offset(2)
       .limit(3)
       .build();
     expect(sql).to.equal(

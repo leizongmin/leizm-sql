@@ -105,7 +105,7 @@ export class QueryBuilder<Q = DataRow, R = any> {
     orderBy: string;
     groupBy: string;
     groupByFields: string;
-    skipRows: number;
+    offsetRows: number;
     limitRows: number;
     limit: string;
     tableAlias: Record<string, string>;
@@ -131,7 +131,7 @@ export class QueryBuilder<Q = DataRow, R = any> {
       orderBy: "",
       groupBy: "",
       groupByFields: "",
-      skipRows: 0,
+      offsetRows: 0,
       limitRows: 0,
       limit: "",
       tableAlias: {},
@@ -604,11 +604,19 @@ export class QueryBuilder<Q = DataRow, R = any> {
    * 跳过指定行数
    * @param rows 行数
    */
-  public skip(rows: number): this {
+  public offset(rows: number): this {
     assert.ok(rows >= 0, `rows must >= 0`);
-    this._data.skipRows = Number(rows);
-    this._data.limit = utils.sqlLimitString(this._data.skipRows, this._data.limitRows);
+    this._data.offsetRows = Number(rows);
+    this._data.limit = utils.sqlLimitString(this._data.offsetRows, this._data.limitRows);
     return this;
+  }
+
+  /**
+   * 跳过指定行数
+   * @param rows 行数
+   */
+  public skip(rows: number): this {
+    return this.offset(rows);
   }
 
   /**
@@ -618,7 +626,7 @@ export class QueryBuilder<Q = DataRow, R = any> {
   public limit(rows: number): this {
     assert.ok(rows >= 0, `rows must >= 0`);
     this._data.limitRows = Number(rows);
-    this._data.limit = utils.sqlLimitString(this._data.skipRows, this._data.limitRows);
+    this._data.limit = utils.sqlLimitString(this._data.offsetRows, this._data.limitRows);
     return this;
   }
 
@@ -629,7 +637,7 @@ export class QueryBuilder<Q = DataRow, R = any> {
   public options(options: QueryOptionsParams): this {
     assert.ok(options, `options must be an Object`);
     if (typeof options.skip !== "undefined") {
-      this.skip(options.skip);
+      this.offset(options.skip);
     }
     if (typeof options.limit !== "undefined") {
       this.limit(options.limit);
@@ -727,7 +735,7 @@ export class QueryBuilder<Q = DataRow, R = any> {
               $orderBy: this._data.orderBy,
               $limit: this._data.limit,
               $fields: this._data.fields,
-              $skipRows: this._data.skipRows,
+              $skipRows: this._data.offsetRows,
               $limitRows: this._data.limitRows,
             },
             true,

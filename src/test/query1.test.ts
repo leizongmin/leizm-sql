@@ -78,7 +78,7 @@ test("select", function() {
         a: 123,
         b: 456,
       })
-      .skip(10)
+      .offset(10)
       .build();
     utils.debug(sql);
     expect(sql).to.equal("SELECT `name`, `age` FROM `test1` WHERE `a`=123 AND `b`=456 LIMIT 10,18446744073709551615");
@@ -90,7 +90,7 @@ test("select", function() {
         a: 123,
         b: 456,
       })
-      .skip(10)
+      .offset(10)
       .limit(20)
       .build();
     utils.debug(sql);
@@ -103,7 +103,7 @@ test("select", function() {
         a: 123,
         b: 456,
       })
-      .skip(10)
+      .offset(10)
       .limit(20)
       .orderBy("`a` DESC, `b` ASC")
       .build();
@@ -119,7 +119,7 @@ test("select", function() {
         a: 123,
         b: 456,
       })
-      .skip(10)
+      .offset(10)
       .limit(20)
       .orderBy("`a` ?, `b` ?", ["DESC", "ASC"])
       .build();
@@ -137,7 +137,7 @@ test("select", function() {
       .and({
         b: 456,
       })
-      .skip(10)
+      .offset(10)
       .limit(20)
       .orderBy("`a` ?, `b` ?", ["DESC", "ASC"])
       .build();
@@ -154,7 +154,7 @@ test("groupBy", function() {
       .where({
         a: 123,
       })
-      .skip(10)
+      .offset(10)
       .limit(20)
       .groupBy("`name`")
       .build();
@@ -167,7 +167,7 @@ test("groupBy", function() {
       .where({
         a: 123,
       })
-      .skip(10)
+      .offset(10)
       .limit(20)
       .groupBy("`name` HAVING `b`=?", [22])
       .build();
@@ -379,7 +379,7 @@ test("sql", function() {
     const sql = Q.table("test1")
       .sql('SELECT JSON_OBJECT("key1", 1, "key2", "abc", "key1", "def") as `data` :$limit')
       .limit(10)
-      .skip(5)
+      .offset(5)
       .build();
     utils.debug(sql);
     expect(sql).to.equal('SELECT JSON_OBJECT("key1", 1, "key2", "abc", "key1", "def") as `data` LIMIT 5,10');
@@ -388,7 +388,7 @@ test("sql", function() {
     const sql = Q.table("test1")
       .sql('SELECT JSON_OBJECT("key1", 1, "key2", "abc", "key1", "def") as `data` :$orderBy :$limit')
       .limit(10)
-      .skip(5)
+      .offset(5)
       .orderBy("`id` ASC")
       .build();
     utils.debug(sql);
@@ -401,7 +401,7 @@ test("sql", function() {
       .sql("SELECT :$fields FROM `test1`")
       .fields("a", "b", "c")
       .limit(10)
-      .skip(5)
+      .offset(5)
       .orderBy("`id` ASC")
       .build();
     utils.debug(sql);
@@ -494,7 +494,7 @@ test("where(condition): support for $in & $like", function() {
         a: { $in: [1, 2, 3] },
         b: { $like: "%hello%" },
       })
-      .skip(10)
+      .offset(10)
       .limit(20)
       .orderBy("`a` DESC, `b` ASC")
       .build();
