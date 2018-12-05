@@ -5,8 +5,14 @@
  */
 
 import { expect } from "chai";
-import Q from "../lib";
+import Q, { table } from "../lib";
 import * as utils from "./utils";
+
+test("format", function() {
+  expect(Q.table("test1").format('"a"')).to.equal('"a"');
+  expect(Q.table("test1").format("a=?", [0])).to.equal("a=0");
+  expect(Q.table("test1").format("a=:v", { v: 0 })).to.equal("a=0");
+});
 
 test("select", function() {
   {
@@ -241,6 +247,27 @@ test("update", function() {
   }
   {
     const sql = Q.table("test1")
+      .update("a=?, b=?", [123, 456])
+      .build();
+    utils.debug(sql);
+    expect(sql).to.equal("UPDATE `test1` SET a=123, b=456");
+  }
+  {
+    const sql = Q.table("test1")
+      .update("a=:a, b=:b", { a: 123, b: 456 })
+      .build();
+    utils.debug(sql);
+    expect(sql).to.equal("UPDATE `test1` SET a=123, b=456");
+  }
+  {
+    const sql = Q.table("test1")
+      .update("`a`=123, b=456")
+      .build();
+    utils.debug(sql);
+    expect(sql).to.equal("UPDATE `test1` SET `a`=123, b=456");
+  }
+  {
+    const sql = Q.table("test1")
       .update({
         a: 123,
         b: 456,
@@ -455,6 +482,20 @@ test("options", function() {
     utils.debug(sql);
     expect(sql).to.equal("SELECT `id`, `name` FROM `test1` GROUP BY `name` ORDER BY `id` DESC LIMIT 1,2");
   }
+  {
+    const sql = Q.table("test1")
+      .select()
+      .options({
+        skip: 1,
+        limit: 2,
+        orderBy: "`id` DESC",
+        groupBy: "`name`",
+        fields: ["id", "name"],
+      })
+      .build();
+    utils.debug(sql);
+    expect(sql).to.equal("SELECT `id`, `name` FROM `test1` GROUP BY `name` ORDER BY `id` DESC LIMIT 1,2");
+  }
 });
 
 test("where(condition): condition for modify operation cannot be empty", function() {
@@ -563,4 +604,8 @@ test("update(data): support for $incr", function() {
     utils.debug(sql);
     expect(sql).to.equal("UPDATE `test1` SET `a`=`a`+1 WHERE `a`=2");
   }
+});
+
+test("build()", function() {
+  expect(() => table("test1").build()).to.throws('invalid query type ""');
 });
