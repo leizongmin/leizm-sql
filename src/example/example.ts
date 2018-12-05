@@ -63,6 +63,14 @@ table("test1")
   .build();
 // UPDATE `test1` SET `a`=123, `b`=456 WHERE `b`=777 LIMIT 12
 
+// 插入数据，如果记录已经存在则改为更新
+table("test1")
+  .insert({ a: 123, b: 456 })
+  .onDuplicateKeyUpdate()
+  .set({ a: "xxx" })
+  .build();
+// INSERT INTO `test1` (`a`, `b`) VALUES (123, 456) ON DUPLICATE KEY UPDATE `a`='xxx'
+
 // 删除数据
 table("test1")
   .delete()
@@ -85,3 +93,18 @@ table("test1")
   ])
   .build();
 // SELECT * FROM `test1` WHERE a=123 AND b IN (SELECT `id` FROM `test2` WHERE `id`<10 LIMIT 100)
+
+const q = table("test1")
+  .select("*")
+  .where({ a: 123 });
+q.clone()
+  .where({ b: 456 })
+  .offset(10)
+  .limit(20)
+  .build();
+// SELECT * FROM `test1` WHERE `a`=123 AND `b`=456 LIMIT 10,20
+q.clone()
+  .where({ b: 789, c: 666 })
+  .orderBy("a DESC")
+  .build();
+// SELECT * FROM `test1` WHERE `a`=123 AND `b`=789 AND `c`=666 ORDER BY a DESC
