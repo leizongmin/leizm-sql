@@ -38,7 +38,16 @@ export type AdvancedCondition = Record<
   string | number | symbol,
   {
     $in?: any[];
+    $notIn?: any[];
     $like?: string;
+    $notLike?: string;
+    $eq?: any;
+    $lt?: any;
+    $lte?: any;
+    $gt?: any;
+    $gte?: any;
+    $isNull?: true;
+    $isNotNull?: true;
   }
 >;
 

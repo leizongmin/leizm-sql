@@ -151,6 +151,14 @@ export function sqlConditionStrings(condition: Record<string, any>): string[] {
     if (isPureConditionObject(info)) {
       Object.keys(info).forEach(op => {
         switch (op) {
+          case "$isNull":
+            assert.ok(info.$isNull, `value of $isNull property must be true`);
+            ret.push(`${escapedName} IS NULL`);
+            break;
+          case "$isNotNull":
+            assert.ok(info.$isNotNull, `value of $isNotNull property must be true`);
+            ret.push(`${escapedName} IS NOT NULL`);
+            break;
           case "$lt":
             ret.push(`${escapedName}<${sqlEscape(info.$lt)}`);
             break;

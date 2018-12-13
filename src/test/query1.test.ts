@@ -593,6 +593,28 @@ test("where(condition): support for $in & $like", function() {
       utils.debug(sql);
     }).to.throw("value for condition type $like in a must be a string");
   }
+  {
+    const sql = Q.table("test1")
+      .select()
+      .where({
+        a: { $eq: 1 },
+        b: { $gt: 2 },
+        c: { $gte: 3 },
+        d: { $lt: 4 },
+        e: { $lte: 5 },
+        f: { $isNull: true },
+        g: { $isNotNull: true },
+        h: { $like: "a" },
+        i: { $notLike: "b" },
+        j: { $in: ["c"] },
+        k: { $notIn: ["d"] },
+      })
+      .build();
+    utils.debug(sql);
+    expect(sql).to.equal(
+      "SELECT * FROM `test1` WHERE `a`=1 AND `b`>2 AND `c`>=3 AND `d`<4 AND `e`<=5 AND `f` IS NULL AND `g` IS NOT NULL AND `h` LIKE 'a' AND `i` NOT LIKE 'b' AND `j` IN ('c') AND `k` NOT IN ('d')",
+    );
+  }
 });
 
 test("update(data): support for $incr", function() {
