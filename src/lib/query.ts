@@ -261,7 +261,7 @@ export class QueryBuilder<Q = DataRow, R = any> {
     assert.ok(typeof tableName === "string", `first parameter must be a string`);
     this._data.currentJoinTableName = tableName;
     if (fields.length < 1) {
-      fields = ["*"];
+      fields = [];
     }
     this._data.joinTables.push({ table: tableName, fields, type, on: "", alias });
     return this;
