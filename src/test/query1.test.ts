@@ -152,6 +152,24 @@ test("select", function() {
       "SELECT `name`, `age` FROM `test1` WHERE `a`=123 AND `b`=456 ORDER BY `a` DESC, `b` ASC LIMIT 10,20",
     );
   }
+  {
+    const sql = Q.table("test1")
+      .selectDistinct("name", "age")
+      .where({
+        a: 123,
+      })
+      .and({
+        b: 456,
+      })
+      .offset(10)
+      .limit(20)
+      .orderBy("`a` ?, `b` ?", ["DESC", "ASC"])
+      .build();
+    utils.debug(sql);
+    expect(sql).to.equal(
+      "SELECT DISTINCT `name`, `age` FROM `test1` WHERE `a`=123 AND `b`=456 ORDER BY `a` DESC, `b` ASC LIMIT 10,20",
+    );
+  }
 });
 test("groupBy", function() {
   {

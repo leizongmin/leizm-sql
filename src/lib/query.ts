@@ -42,6 +42,14 @@ export class QueryBuilder<Q = DataRow, R = any> {
   }
 
   /**
+   * 查询
+   * @param fields
+   */
+  public static selectDistinct<Q = DataRow, R = any>(...fields: string[]): QueryBuilder<Q, R> {
+    return new QueryBuilder().selectDistinct(...fields);
+  }
+
+  /**
    * 插入
    * @param data 数据
    */
@@ -387,6 +395,17 @@ export class QueryBuilder<Q = DataRow, R = any> {
   }
 
   /**
+   * 去除重复的字段查询
+   * @param fields
+   */
+  public selectDistinct(...fields: string[]): this {
+    assert.ok(this._data.type === "", `cannot change query type after it was set to "${this._data.type}"`);
+    this._data.type = "SELECT DISTINCT";
+    assert.ok(fields.length > 0, `distinct expected one or more fields`);
+    return this.fields(...fields);
+  }
+
+  /**
    * 查询数量
    * @param name 存储结果的字段名
    */
@@ -703,7 +722,8 @@ export class QueryBuilder<Q = DataRow, R = any> {
     assert.ok(currentTableName && currentTableEscapedName, "missing table name");
 
     switch (data.type) {
-      case "SELECT": {
+      case "SELECT":
+      case "SELECT DISTINCT": {
         const join: string[] = [];
         if (data.joinTables.length > 0) {
           // 设置 FROM table AS a 并且将 SELECT x 改为 SELECT a.x
@@ -741,7 +761,7 @@ export class QueryBuilder<Q = DataRow, R = any> {
           data.fields = ["*"];
         }
         const tail = utils.joinMultiString(...join, where, data.groupBy, data.orderBy, data.limit);
-        sql = `SELECT ${data.fields.join(", ")} FROM ${currentTableEscapedName} ${tail}`;
+        sql = `${data.type} ${data.fields.join(", ")} FROM ${currentTableEscapedName} ${tail}`;
         break;
       }
       case "INSERT": {
