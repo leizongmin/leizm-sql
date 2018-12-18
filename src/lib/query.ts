@@ -82,7 +82,6 @@ export class QueryBuilder<Q = DataRow, R = any> {
     orderFields: string;
     orderBy: string;
     groupBy: string;
-    groupByFields: string;
     offsetRows: number;
     limitRows: number;
     limit: string;
@@ -116,7 +115,6 @@ export class QueryBuilder<Q = DataRow, R = any> {
       orderFields: "",
       orderBy: "",
       groupBy: "",
-      groupByFields: "",
       offsetRows: 0,
       limitRows: 0,
       limit: "",
@@ -623,30 +621,39 @@ export class QueryBuilder<Q = DataRow, R = any> {
 
   /**
    * 分组方法
+   * @param fields 字段
+   */
+  public groupBy(...fields: string[]): this {
+    assert.ok(fields.length > 0, `groupBy expected one or more fields`);
+    this._data.groupBy = `GROUP BY ${utils.formatFields("", fields).join(", ")}`;
+    return this;
+  }
+
+  /**
+   * 分组条件
    * @param tpl SQL 查询语句
    */
-  public groupBy(tpl: string): this;
+  public having(tpl: string): this;
   /**
-   * 分组方法
+   * 分组条件
    * @param tpl SQL 查询语句
    * @param values 模板参数，如 { a: 123 }
    */
-  public groupBy(tpl: string, values: DataRow): this;
+  public having(tpl: string, values: DataRow): this;
   /**
-   * 分组方法
+   * 分组条件
    * @param tpl SQL 查询语句
    * @param values 模板参数，如 [ 123 ]
    */
-  public groupBy(tpl: string, values: any[]): this;
+  public having(tpl: string, values: any[]): this;
 
-  public groupBy(tpl: string, values?: DataRow | any[]): this {
+  public having(tpl: string, values?: DataRow | any[]): this {
+    assert.ok(this._data.groupBy.length > 0, `please call groupBy() firstly`);
     if (values) {
-      this._data.groupByFields = this.format(tpl, values);
+      this._data.groupBy += " HAVING " + this.format(tpl, values);
     } else {
-      this._data.groupByFields = tpl;
+      this._data.groupBy += " HAVING " + tpl;
     }
-    this._data.groupBy = `GROUP BY ${this._data.groupByFields}`;
-    this._data.groupBy = this._data.groupBy.replace(/'DESC'/gi, "DESC").replace(/'ASC'/gi, "ASC");
     return this;
   }
 

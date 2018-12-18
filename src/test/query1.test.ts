@@ -180,7 +180,7 @@ test("groupBy", function() {
       })
       .offset(10)
       .limit(20)
-      .groupBy("`name`")
+      .groupBy("name")
       .build();
     utils.debug(sql);
     expect(sql).to.equal("SELECT `name`, `age` FROM `test1` WHERE `a`=123 GROUP BY `name` LIMIT 10,20");
@@ -193,10 +193,13 @@ test("groupBy", function() {
       })
       .offset(10)
       .limit(20)
-      .groupBy("`name` HAVING `b`=?", [22])
+      .groupBy("a", "b")
+      .having("COUNT(`a`)>?", [789])
       .build();
     utils.debug(sql);
-    expect(sql).to.equal("SELECT `name`, `age` FROM `test1` WHERE `a`=123 GROUP BY `name` HAVING `b`=22 LIMIT 10,20");
+    expect(sql).to.equal(
+      "SELECT `name`, `age` FROM `test1` WHERE `a`=123 GROUP BY `a`, `b` HAVING COUNT(`a`)>789 LIMIT 10,20",
+    );
   }
 });
 test("count", function() {
