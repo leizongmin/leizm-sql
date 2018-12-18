@@ -33,7 +33,7 @@ npm install @leizm/sql --save
 ## 使用方法
 
 ```typescript
-import { table } from "@leizm/sql";
+import { table, expr } from "@leizm/sql";
 
 // 普通查询
 table("test")
