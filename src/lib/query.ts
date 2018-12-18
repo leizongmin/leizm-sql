@@ -6,62 +6,18 @@
 
 import * as assert from "assert";
 import * as utils from "./utils";
-
-export interface QueryOptionsParams {
-  /**
-   * 跳过的行数
-   */
-  skip?: number;
-  /**
-   * 跳过的行数
-   */
-  offset?: number;
-  /**
-   * 返回的行数
-   */
-  limit?: number;
-  /**
-   * 排序方向
-   */
-  orderBy?: string;
-  /**
-   * 分组
-   */
-  groupBy?: string;
-  /**
-   * 返回字段列表
-   */
-  fields?: string[];
-}
-
-export type AdvancedCondition = Record<
-  string | number | symbol,
-  {
-    $in?: any[];
-    $notIn?: any[];
-    $like?: string;
-    $notLike?: string;
-    $eq?: any;
-    $lt?: any;
-    $lte?: any;
-    $gt?: any;
-    $gte?: any;
-    $isNull?: true;
-    $isNotNull?: true;
-  }
->;
-
-export type AdvancedUpdate = Record<
-  string | number | symbol,
-  {
-    $incr?: number;
-  }
->;
-
-export type DataRow = Record<string, any>;
+import { DataRow, QueryOptionsParams, AdvancedCondition, AdvancedUpdate } from "./common";
+import { Expression } from "./expr";
 
 export class QueryBuilder<Q = DataRow, R = any> {
   //////////////////////////////////////////////////////////////////////////////
+
+  /**
+   * 表达式构造器
+   */
+  public static expr(): Expression {
+    return new Expression();
+  }
 
   /**
    * 创建新Query，设置表名
@@ -335,12 +291,22 @@ export class QueryBuilder<Q = DataRow, R = any> {
    * @param condition 模板字符串，可以为 ('aaa=:a AND bbb=:b', { a: 123, b: 456 }) 或 ('aaa=? AND bbb=?', [ 123, 456 ])
    */
   public where(condition: string, values: DataRow | any[]): this;
+  /**
+   * 查询条件
+   * @param condition 表达式
+   */
+  public where(condition: Expression): this;
 
-  public where(condition: Partial<Q> | Pick<AdvancedCondition, keyof Q> | string, values?: DataRow | any[]): this {
+  public where(
+    condition: Partial<Q> | Pick<AdvancedCondition, keyof Q> | string | Expression,
+    values?: DataRow | any[],
+  ): this {
     if (typeof condition === "string") {
       if (values) {
         return this.and(condition, values);
       }
+      return this.and(condition);
+    } else if (condition instanceof Expression) {
       return this.and(condition);
     }
     return this.and(condition);
@@ -366,8 +332,16 @@ export class QueryBuilder<Q = DataRow, R = any> {
    * @param condition 模板字符串，可以为 ('aaa=? AND bbb=?', [ 123, 456 ])
    */
   public and(condition: string, values: any[]): this;
+  /**
+   * 查询条件
+   * @param condition 表达式
+   */
+  public and(condition: Expression): this;
 
-  public and(condition: Partial<Q> | Pick<AdvancedCondition, keyof Q> | string, values?: DataRow | any[]): this {
+  public and(
+    condition: Partial<Q> | Pick<AdvancedCondition, keyof Q> | string | Expression,
+    values?: DataRow | any[],
+  ): this {
     const t = typeof condition;
     assert.ok(condition, `missing condition`);
     assert.ok(t === "string" || t === "object", `condition must be a string or object`);
@@ -377,6 +351,8 @@ export class QueryBuilder<Q = DataRow, R = any> {
         assert.ok(condition.trim(), `condition for modify operation cannot be empty`);
       }
       this._data.conditions.push(this.format(condition, values || []));
+    } else if (condition instanceof Expression) {
+      this._data.conditions.push(condition.build());
     } else {
       const keys = utils.findKeysForUndefinedValue(condition);
       assert.ok(keys.length < 1, `found undefined value for condition keys ${keys}; it may caused unexpected errors`);

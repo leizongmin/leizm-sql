@@ -144,6 +144,19 @@ q.clone()
   .orderBy("a DESC")
   .build();
 // SELECT * FROM `test1` WHERE `a`=123 AND `b`=789 AND `c`=666 ORDER BY a DESC
+
+// 条件表达式
+table("test")
+  .select("*")
+  .where(
+    expr()
+      .and("a=?", [123])
+      .or({ b: 456 })
+      .and({ c: { $in: [789] } })
+      .or("d=:d", { d: 666 }),
+  )
+  .build();
+// SELECT * FROM `test` WHERE (a=123 OR `b`=456 AND `c` IN (789) OR d=666)
 ```
 
 ## License
