@@ -39,6 +39,7 @@ export type AdvancedCondition = Record<
       $like?: string;
       $notLike?: string;
       $eq?: any;
+      $ne?: any;
       $lt?: any;
       $lte?: any;
       $gt?: any;

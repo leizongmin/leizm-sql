@@ -174,6 +174,9 @@ export function sqlConditionStrings(condition: Record<string, any>): string[] {
           case "$eq":
             ret.push(`${escapedName}=${sqlEscape(info.$eq)}`);
             break;
+          case "$ne":
+            ret.push(`${escapedName}<>${sqlEscape(info.$ne)}`);
+            break;
           case "$in":
             if (isQueryBuilder(info.$in)) {
               const sql = info.$in.build();
