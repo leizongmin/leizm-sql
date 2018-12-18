@@ -261,3 +261,18 @@ export function joinMultiString(...strs: string[]): string {
 export function deepCopy<T = any>(data: T): T {
   return JSON.parse(JSON.stringify(data));
 }
+
+/**
+ * 格式化字段列表
+ * @param table
+ * @param fields
+ */
+export function formatFields(table: string, fields: string[]) {
+  const prefix = table ? `${table}.` : "";
+  return fields.map(n => {
+    if (n === "*") return `${prefix}*`;
+    if (n.toLowerCase().indexOf(" as ") !== -1) return n;
+    if (n[0] === "`") return `${prefix}${n}`;
+    return `${prefix}${sqlEscapeId(n)}`;
+  });
+}

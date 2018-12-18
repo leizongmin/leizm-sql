@@ -55,7 +55,7 @@ test("static method", function() {
 
 test("leftJoin", function() {
   {
-    const sql = Q.select()
+    const sql = Q.select("*")
       .from("hello")
       .as("A")
       .leftJoin("world")
@@ -68,6 +68,22 @@ test("leftJoin", function() {
       .build();
     expect(sql).to.equal(
       "SELECT `A`.*, `B`.* FROM `hello` AS `A` LEFT JOIN `world` AS `B` ON A.id=B.id WHERE 1 AND 2 LIMIT 2,3",
+    );
+  }
+  {
+    const sql = Q.select()
+      .from("hello")
+      .as("A")
+      .leftJoin("world")
+      .as("B")
+      .on("A.id=B.id")
+      .where("1")
+      .and("2")
+      .offset(2)
+      .limit(3)
+      .build();
+    expect(sql).to.equal(
+      "SELECT `B`.* FROM `hello` AS `A` LEFT JOIN `world` AS `B` ON A.id=B.id WHERE 1 AND 2 LIMIT 2,3",
     );
   }
   {
@@ -104,7 +120,7 @@ test("leftJoin", function() {
 
 test("rightJoin", function() {
   {
-    const sql = Q.select()
+    const sql = Q.select("*")
       .from("hello")
       .as("A")
       .rightJoin("world")
@@ -153,7 +169,7 @@ test("rightJoin", function() {
 
 test("join", function() {
   {
-    const sql = Q.select()
+    const sql = Q.select("*")
       .from("hello")
       .as("A")
       .join("world")
@@ -215,6 +231,22 @@ test("join", function() {
       .build();
     expect(sql).to.equal(
       "SELECT `A`.`x`, `A`.`y`, `B`.`z`, `C`.`k` FROM `hello` AS `A` LEFT JOIN `world` AS `B` ON A.id=B.id LEFT JOIN `world` AS `C` ON B.uid=C.id WHERE 1 AND 2 LIMIT 2,3",
+    );
+  }
+  {
+    const sql = Q.select("x", "y", "count(y) AS c1")
+      .from("hello")
+      .as("A")
+      .join("world", ["z", "count(z) as c2"])
+      .as("B")
+      .on("A.id=B.id")
+      .where("1")
+      .and("2")
+      .offset(2)
+      .limit(3)
+      .build();
+    expect(sql).to.equal(
+      "SELECT `A`.`x`, `A`.`y`, count(y) AS c1, `B`.`z`, count(z) as c2 FROM `hello` AS `A` JOIN `world` AS `B` ON A.id=B.id WHERE 1 AND 2 LIMIT 2,3",
     );
   }
 });

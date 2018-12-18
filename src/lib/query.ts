@@ -105,7 +105,7 @@ export class QueryBuilder<Q = DataRow, R = any> {
   protected readonly _data: {
     tableName?: string;
     tableNameEscaped?: string;
-    fields: string;
+    fields: string[];
     conditions: string[];
     type: string;
     update: string[];
@@ -139,7 +139,7 @@ export class QueryBuilder<Q = DataRow, R = any> {
    */
   constructor() {
     this._data = {
-      fields: "*",
+      fields: [],
       conditions: [],
       type: "",
       update: [],
@@ -405,13 +405,8 @@ export class QueryBuilder<Q = DataRow, R = any> {
    * @param fields 要查询的字段
    */
   public fields(...fields: string[]): this {
-    assert.ok(!(this._data.fields && this._data.fields !== "*"), `cannot change fields after it has been set`);
-    this._data.fields = fields
-      .map(name => {
-        assert.ok(name && typeof name === "string", `field name must be a string`);
-        return name === "*" ? name : utils.sqlEscapeId(name);
-      })
-      .join(", ");
+    assert.ok(!(this._data.fields.length > 0), `cannot change fields after it has been set`);
+    this._data.fields = this._data.fields.concat(utils.formatFields("", fields));
     return this;
   }
 
@@ -422,7 +417,7 @@ export class QueryBuilder<Q = DataRow, R = any> {
   public count(name: string): this {
     assert.ok(this._data.type === "", `cannot change query type after it was set to "${this._data.type}"`);
     this._data.type = "SELECT";
-    this._data.fields = "COUNT(*) AS " + utils.sqlEscapeId(name);
+    this._data.fields.push("COUNT(*) AS " + utils.sqlEscapeId(name));
     return this;
   }
 
@@ -739,15 +734,9 @@ export class QueryBuilder<Q = DataRow, R = any> {
           if (data.mapTableToAlias[currentTableName]) {
             const a = utils.sqlEscapeId(data.mapTableToAlias[currentTableName]);
             join.push(`AS ${a}`);
-            data.fields = data.fields
-              .split(/\s*,\s*/g)
-              .map(n => `${a}.${n}`)
-              .join(", ");
+            data.fields = utils.formatFields(a, data.fields);
           } else {
-            data.fields = data.fields
-              .split(/\s*,\s*/g)
-              .map(n => `${currentTableEscapedName}.${n}`)
-              .join(", ");
+            data.fields = utils.formatFields(currentTableEscapedName, data.fields);
           }
           // 创建连表
           for (let i = 0; i < data.joinTables.length; i++) {
@@ -765,13 +754,18 @@ export class QueryBuilder<Q = DataRow, R = any> {
               str += ` ON ${item.on}`;
             }
             if (item.fields) {
-              data.fields += ", " + item.fields.map(n => `${a}.${n === "*" ? "*" : utils.sqlEscapeId(n)}`).join(", ");
+              data.fields = data.fields.concat(utils.formatFields(a, item.fields));
             }
             join.push(str);
           }
+        } else {
+          data.fields = utils.formatFields("", data.fields);
+        }
+        if (data.fields.length === 0) {
+          data.fields = ["*"];
         }
         const tail = utils.joinMultiString(...join, where, data.groupBy, data.orderBy, data.limit);
-        sql = `SELECT ${data.fields} FROM ${currentTableEscapedName} ${tail}`;
+        sql = `SELECT ${data.fields.join(", ")} FROM ${currentTableEscapedName} ${tail}`;
         break;
       }
       case "INSERT": {
@@ -801,7 +795,7 @@ export class QueryBuilder<Q = DataRow, R = any> {
               $table: this._data.tableNameEscaped,
               $orderBy: this._data.orderBy,
               $limit: this._data.limit,
-              $fields: this._data.fields,
+              $fields: this._data.fields.join(", "),
               $skipRows: this._data.offsetRows,
               $offsetRows: this._data.offsetRows,
               $limitRows: this._data.limitRows,
