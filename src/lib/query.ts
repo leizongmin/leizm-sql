@@ -122,9 +122,16 @@ export class QueryBuilder<Q = DataRow, R = any> {
     offsetRows: number;
     limitRows: number;
     limit: string;
-    tableAlias: Record<string, string>;
+    mapTableToAlias: Record<string, string>;
+    mapAliasToTable: Record<string, string>;
     currentJoinTableName: string;
-    joinTables: Array<{ table: string; fields: string[]; type: "LEFT JOIN" | "JOIN" | "RIGHT JOIN"; on: string }>;
+    joinTables: Array<{
+      table: string;
+      fields: string[];
+      type: "LEFT JOIN" | "JOIN" | "RIGHT JOIN";
+      on: string;
+      alias: string;
+    }>;
   };
 
   /**
@@ -149,7 +156,8 @@ export class QueryBuilder<Q = DataRow, R = any> {
       offsetRows: 0,
       limitRows: 0,
       limit: "",
-      tableAlias: {},
+      mapTableToAlias: {},
+      mapAliasToTable: {},
       currentJoinTableName: "",
       joinTables: [],
     };
@@ -231,10 +239,10 @@ export class QueryBuilder<Q = DataRow, R = any> {
    * @param aliasName 别名
    */
   protected setTableAlias(tableName: string, aliasName: string) {
-    assert.ok(!(tableName in this._data.tableAlias), `alias name "${tableName}" already registered`);
-    assert.ok(!(aliasName in this._data.tableAlias), `alias name "${aliasName}" already registered`);
-    this._data.tableAlias[aliasName] = tableName;
-    this._data.tableAlias[tableName] = aliasName;
+    // assert.ok(!(tableName in this._data.mapTableToAlias), `table name "${tableName}" already registered`);
+    assert.ok(!(aliasName in this._data.mapAliasToTable), `alias name "${aliasName}" already registered`);
+    this._data.mapAliasToTable[aliasName] = tableName;
+    this._data.mapTableToAlias[tableName] = aliasName;
   }
 
   /**
@@ -242,14 +250,20 @@ export class QueryBuilder<Q = DataRow, R = any> {
    * @param tableName
    * @param type
    * @param fields
+   * @param alias
    */
-  protected addJoinTable(tableName: string, type: "JOIN" | "LEFT JOIN" | "RIGHT JOIN", fields: string[]): this {
+  protected addJoinTable(
+    tableName: string,
+    type: "JOIN" | "LEFT JOIN" | "RIGHT JOIN",
+    fields: string[],
+    alias: string = "",
+  ): this {
     assert.ok(typeof tableName === "string", `first parameter must be a string`);
     this._data.currentJoinTableName = tableName;
     if (fields.length < 1) {
       fields = ["*"];
     }
-    this._data.joinTables.push({ table: tableName, fields, type, on: "" });
+    this._data.joinTables.push({ table: tableName, fields, type, on: "", alias });
     return this;
   }
 
@@ -261,6 +275,9 @@ export class QueryBuilder<Q = DataRow, R = any> {
     assert.ok(typeof name === "string", `first parameter must be a string`);
     const tableName = this._data.currentJoinTableName || this._data.tableName!;
     this.setTableAlias(tableName, name);
+    if (this._data.joinTables.length > 0) {
+      this._data.joinTables[this._data.joinTables.length - 1].alias = name;
+    }
     return this;
   }
 
@@ -704,42 +721,42 @@ export class QueryBuilder<Q = DataRow, R = any> {
    * 生成 SQL 语句
    */
   public build(): string {
-    const d = this._data;
-    const tn = d.tableName!;
-    const t = d.tableNameEscaped!;
-    d.conditions = d.conditions.map(v => v.trim()).filter(v => v);
-    const where = d.conditions.length > 0 ? `WHERE ${d.conditions.join(" AND ")}` : "";
-    const limit = d.limit;
+    const data = this._data;
+    const currentTableName = data.tableName!;
+    const currentTableEscapedName = data.tableNameEscaped!;
+    data.conditions = data.conditions.map(v => v.trim()).filter(v => v);
+    const where = data.conditions.length > 0 ? `WHERE ${data.conditions.join(" AND ")}` : "";
+    const limit = data.limit;
     let sql: string;
 
-    assert.ok(tn && t, "missing table name");
+    assert.ok(currentTableName && currentTableEscapedName, "missing table name");
 
-    switch (d.type) {
+    switch (data.type) {
       case "SELECT": {
         const join: string[] = [];
-        if (d.joinTables.length > 0) {
+        if (data.joinTables.length > 0) {
           // 设置 FROM table AS a 并且将 SELECT x 改为 SELECT a.x
-          if (d.tableAlias[tn]) {
-            const a = utils.sqlEscapeId(d.tableAlias[tn]);
+          if (data.mapTableToAlias[currentTableName]) {
+            const a = utils.sqlEscapeId(data.mapTableToAlias[currentTableName]);
             join.push(`AS ${a}`);
-            d.fields = d.fields
+            data.fields = data.fields
               .split(/\s*,\s*/g)
               .map(n => `${a}.${n}`)
               .join(", ");
           } else {
-            d.fields = d.fields
+            data.fields = data.fields
               .split(/\s*,\s*/g)
-              .map(n => `${t}.${n}`)
+              .map(n => `${currentTableEscapedName}.${n}`)
               .join(", ");
           }
           // 创建连表
-          for (let i = 0; i < d.joinTables.length; i++) {
-            const item = d.joinTables[i];
+          for (let i = 0; i < data.joinTables.length; i++) {
+            const item = data.joinTables[i];
             const t = utils.sqlEscapeId(item.table);
             let str = `${item.type} ${t}`;
-            let a = "";
-            if (d.tableAlias[item.table]) {
-              a = utils.sqlEscapeId(d.tableAlias[item.table]);
+            let a = item.alias || data.mapTableToAlias[item.table] || "";
+            if (a) {
+              a = utils.sqlEscapeId(a);
               str += ` AS ${a}`;
             } else {
               a = t;
@@ -748,38 +765,38 @@ export class QueryBuilder<Q = DataRow, R = any> {
               str += ` ON ${item.on}`;
             }
             if (item.fields) {
-              d.fields += ", " + item.fields.map(n => `${a}.${n === "*" ? "*" : utils.sqlEscapeId(n)}`).join(", ");
+              data.fields += ", " + item.fields.map(n => `${a}.${n === "*" ? "*" : utils.sqlEscapeId(n)}`).join(", ");
             }
             join.push(str);
           }
         }
-        const tail = utils.joinMultiString(...join, where, d.groupBy, d.orderBy, d.limit);
-        sql = `SELECT ${d.fields} FROM ${t} ${tail}`;
+        const tail = utils.joinMultiString(...join, where, data.groupBy, data.orderBy, data.limit);
+        sql = `SELECT ${data.fields} FROM ${currentTableEscapedName} ${tail}`;
         break;
       }
       case "INSERT": {
-        sql = `INSERT INTO ${t} ${d.insert}`;
+        sql = `INSERT INTO ${currentTableEscapedName} ${data.insert}`;
         break;
       }
       case "UPDATE": {
-        assert.ok(d.update.length > 0, `update data connot be empty`);
+        assert.ok(data.update.length > 0, `update data connot be empty`);
         const tail = utils.joinMultiString(where, limit);
-        sql = `UPDATE ${t} SET ${d.update.join(", ")} ${tail}`;
+        sql = `UPDATE ${currentTableEscapedName} SET ${data.update.join(", ")} ${tail}`;
         break;
       }
       case "INSERT_OR_UPDATE":
-        assert.ok(d.update.length > 0, `update data connot be empty`);
-        sql = `INSERT INTO ${t} ${d.insert} ON DUPLICATE KEY UPDATE ${d.update.join(", ")}`;
+        assert.ok(data.update.length > 0, `update data connot be empty`);
+        sql = `INSERT INTO ${currentTableEscapedName} ${data.insert} ON DUPLICATE KEY UPDATE ${data.update.join(", ")}`;
         break;
       case "DELETE": {
         const tail = utils.joinMultiString(where, limit);
-        sql = `DELETE FROM ${t} ${tail}`;
+        sql = `DELETE FROM ${currentTableEscapedName} ${tail}`;
         break;
       }
       case "CUSTOM": {
         this._data.sql = this.format(
           utils.sqlFormatObject(
-            d.sqlTpl,
+            data.sqlTpl,
             {
               $table: this._data.tableNameEscaped,
               $orderBy: this._data.orderBy,
@@ -791,13 +808,13 @@ export class QueryBuilder<Q = DataRow, R = any> {
             },
             true,
           ),
-          d.sqlValues,
+          data.sqlValues,
         );
         sql = this._data.sql;
         break;
       }
       default:
-        throw new Error(`invalid query type "${d.type}"`);
+        throw new Error(`invalid query type "${data.type}"`);
     }
     return sql.trim();
   }

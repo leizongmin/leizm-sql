@@ -198,4 +198,23 @@ test("join", function() {
       "SELECT `hello`.`x`, `hello`.`y`, `world`.`z` FROM `hello` JOIN `world` ON hello.id=world.id WHERE 1 AND 2 LIMIT 2,3",
     );
   }
+  {
+    const sql = Q.select("x", "y")
+      .from("hello")
+      .as("A")
+      .leftJoin("world", ["z"])
+      .as("B")
+      .on("A.id=B.id")
+      .leftJoin("world", ["k"])
+      .as("C")
+      .on("B.uid=C.id")
+      .where("1")
+      .and("2")
+      .offset(2)
+      .limit(3)
+      .build();
+    expect(sql).to.equal(
+      "SELECT `A`.`x`, `A`.`y`, `B`.`z`, `C`.`k` FROM `hello` AS `A` LEFT JOIN `world` AS `B` ON A.id=B.id LEFT JOIN `world` AS `C` ON B.uid=C.id WHERE 1 AND 2 LIMIT 2,3",
+    );
+  }
 });
