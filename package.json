@@ -1,6 +1,6 @@
 {
   "name": "@leizm/sql",
-  "version": "1.4.1",
+  "version": "1.5.0",
   "description": "SQL查询构造器",
   "main": "dist/lib/index.js",
   "typings": "dist/lib/index.d.ts",
