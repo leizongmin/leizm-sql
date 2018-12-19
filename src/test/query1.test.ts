@@ -630,11 +630,12 @@ test("where(condition): support for $in & $like", function() {
         j: { $in: ["c"] },
         k: { $notIn: ["d"] },
         l: { $ne: "x" },
+        m: { $raw: "CURRENT_TIMESTAMP" },
       })
       .build();
     utils.debug(sql);
     expect(sql).to.equal(
-      "SELECT * FROM `test1` WHERE `a`=1 AND `b`>2 AND `c`>=3 AND `d`<4 AND `e`<=5 AND `f` IS NULL AND `g` IS NOT NULL AND `h` LIKE 'a' AND `i` NOT LIKE 'b' AND `j` IN ('c') AND `k` NOT IN ('d') AND `l`<>'x'",
+      "SELECT * FROM `test1` WHERE `a`=1 AND `b`>2 AND `c`>=3 AND `d`<4 AND `e`<=5 AND `f` IS NULL AND `g` IS NOT NULL AND `h` LIKE 'a' AND `i` NOT LIKE 'b' AND `j` IN ('c') AND `k` NOT IN ('d') AND `l`<>'x' AND `m`=CURRENT_TIMESTAMP",
     );
   }
 });

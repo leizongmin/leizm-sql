@@ -218,6 +218,9 @@ export function sqlConditionStrings(condition: Record<string, any>): string[] {
             );
             ret.push(`${escapedName} NOT LIKE ${sqlEscape(info.$notLike)}`);
             break;
+          case "$raw":
+            ret.push(`${escapedName}=${info.$raw}`);
+            break;
           default:
             throw new Error(`condition type ${op} does not supported`);
         }
