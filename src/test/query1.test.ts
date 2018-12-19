@@ -643,11 +643,11 @@ test("where(condition): support for $in & $like", function() {
 test("update(data): support for $incr", function() {
   {
     const sql = Q.table("test1")
-      .update({ a: { $incr: 1 } })
+      .update({ a: { $incr: 1 }, b: { $decr: 2 }, c: { $raw: "CURRENT_TIMESTAMP" } })
       .where({ a: 2 })
       .build();
     utils.debug(sql);
-    expect(sql).to.equal("UPDATE `test1` SET `a`=`a`+1 WHERE `a`=2");
+    expect(sql).to.equal("UPDATE `test1` SET `a`=`a`+(1), `b`=`b`-(2), `c`=CURRENT_TIMESTAMP WHERE `a`=2");
   }
 });
 

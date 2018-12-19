@@ -64,6 +64,8 @@ test("utils sqlFormat", function() {
 });
 
 test("utils sqlUpdateString", function() {
-  expect(sqlUpdateString({ a: { $incr: 123 } })).to.equal("`a`=`a`+123");
+  expect(sqlUpdateString({ a: { $incr: 123 } })).to.equal("`a`=`a`+(123)");
+  expect(sqlUpdateString({ a: { $decr: 123 } })).to.equal("`a`=`a`-(123)");
+  expect(sqlUpdateString({ a: { $raw: "now()" } })).to.equal("`a`=now()");
   expect(() => sqlUpdateString({ a: { $xxx: 123 } })).throws("does not supported");
 });

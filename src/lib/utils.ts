@@ -119,7 +119,11 @@ export function sqlUpdateString(data: Record<string, any>): string {
         const op = Object.keys(info)[0];
         switch (op) {
           case "$incr":
-            return `${escapedName}=${escapedName}+${sqlEscape(info.$incr)}`;
+            return `${escapedName}=${escapedName}+(${sqlEscape(info.$incr)})`;
+          case "$decr":
+            return `${escapedName}=${escapedName}-(${sqlEscape(info.$decr)})`;
+          case "$raw":
+            return `${escapedName}=${info.$raw}`;
           default:
             throw new Error(`update type ${op} does not supported`);
         }

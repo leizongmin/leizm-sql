@@ -34,31 +34,31 @@ export interface QueryOptionsParams {
 export type AdvancedCondition = Record<
   string | number | symbol,
   | {
-      /* x IN y */
+      /** x IN y */
       $in?: any[];
-      /* x NOT IN y */
+      /** x NOT IN y */
       $notIn?: any[];
-      /* x LIKE y */
+      /** x LIKE y */
       $like?: string;
-      /* x NOT LIKE y */
+      /** x NOT LIKE y */
       $notLike?: string;
-      /* x = y */
+      /** x = y */
       $eq?: any;
-      /* x <> y */
+      /** x <> y */
       $ne?: any;
-      /* x < y */
+      /** x < y */
       $lt?: any;
-      /* x <= y */
+      /** x <= y */
       $lte?: any;
-      /* x > y */
+      /** x > y */
       $gt?: any;
-      /* x >= y */
+      /** x >= y */
       $gte?: any;
-      /* x IS NULL */
+      /** x IS NULL */
       $isNull?: true;
-      /* x IS NOT NULL */
+      /** x IS NOT NULL */
       $isNotNull?: true;
-      /* x = y (y不做任何转义) */
+      /** x = y (y不做任何转义) */
       $raw?: string;
     }
   | any
@@ -66,9 +66,15 @@ export type AdvancedCondition = Record<
 
 export type AdvancedUpdate = Record<
   string | number | symbol,
-  {
-    $incr?: number;
-  }
+  | {
+      /** x = x + y */
+      $incr?: number;
+      /** x = x - y */
+      $decr?: number;
+      /** x = y (y不做任何转义) */
+      $raw: string;
+    }
+  | any
 >;
 
 export type DataRow = Record<string, any>;
