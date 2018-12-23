@@ -26,8 +26,10 @@ test("utils sqlConditionStrings", function() {
   expect(sqlConditionStrings({ a: { $notLike: "xx%" } })).to.deep.equal(["`a` NOT LIKE 'xx%'"]);
   expect(sqlConditionStrings({ a: { $in: [1, 2, 3] } })).to.deep.equal(["`a` IN (1, 2, 3)"]);
   expect(sqlConditionStrings({ a: { $in: new TestQuery() } })).to.deep.equal(["`a` IN (xxx)"]);
+  expect(sqlConditionStrings({ a: { $in: [] } })).to.deep.equal(["0 /* empty list warn: `a` IN () */"]);
   expect(sqlConditionStrings({ a: { $notIn: [1, 2, 3] } })).to.deep.equal(["`a` NOT IN (1, 2, 3)"]);
   expect(sqlConditionStrings({ a: { $notIn: new TestQuery() } })).to.deep.equal(["`a` NOT IN (xxx)"]);
+  expect(sqlConditionStrings({ a: { $notIn: [] } })).to.deep.equal(["1 /* empty list warn: `a` NOT IN () */"]);
   expect(() => sqlConditionStrings({ a: { $xxx: 1 } })).throws(/not supported/);
   expect(() => sqlConditionStrings({ a: { $in: new TestQuery2() } })).throws("build() must returns a string");
   expect(() => sqlConditionStrings({ a: { $in: false } })).throws("must be an array");

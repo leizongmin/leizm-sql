@@ -191,7 +191,12 @@ export function sqlConditionStrings(condition: Record<string, any>): string[] {
               );
               ret.push(`${escapedName} IN (${sql})`);
             } else if (Array.isArray(info.$in)) {
-              ret.push(`${escapedName} IN (${info.$in.map((v: any) => sqlEscape(v)).join(", ")})`);
+              const line = `${escapedName} IN (${info.$in.map((v: any) => sqlEscape(v)).join(", ")})`;
+              if (info.$in.length > 0) {
+                ret.push(line);
+              } else {
+                ret.push(`0 /* empty list warn: ${line} */`);
+              }
             } else {
               throw new Error(`value for condition type $in in field ${name} must be an array`);
             }
@@ -206,7 +211,12 @@ export function sqlConditionStrings(condition: Record<string, any>): string[] {
               );
               ret.push(`${escapedName} NOT IN (${sql})`);
             } else if (Array.isArray(info.$notIn)) {
-              ret.push(`${escapedName} NOT IN (${info.$notIn.map((v: any) => sqlEscape(v)).join(", ")})`);
+              const line = `${escapedName} NOT IN (${info.$notIn.map((v: any) => sqlEscape(v)).join(", ")})`;
+              if (info.$notIn.length > 0) {
+                ret.push(line);
+              } else {
+                ret.push(`1 /* empty list warn: ${line} */`);
+              }
             } else {
               throw new Error(`value for condition type $notIn in field ${name} must be an array`);
             }
