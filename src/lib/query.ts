@@ -284,9 +284,9 @@ export class QueryBuilder<Q = DataRow, R = any> {
 
   /**
    * 查询条件
-   * @param condition 键值对数据：{ aaa: 1, bbb: 22 })
+   * @param condition 表达式
    */
-  public where(condition: Partial<Q> | Pick<AdvancedCondition, keyof Q>): this;
+  public where(condition: Expression): this;
   /**
    * 查询条件
    * @param condition SQL 语句
@@ -294,17 +294,17 @@ export class QueryBuilder<Q = DataRow, R = any> {
   public where(condition: string): this;
   /**
    * 查询条件
+   * @param condition 键值对数据：{ aaa: 1, bbb: 22 })
+   */
+  public where(condition: Partial<Q> | Partial<Pick<AdvancedCondition, keyof Q>>): this;
+  /**
+   * 查询条件
    * @param condition 模板字符串，可以为 ('aaa=:a AND bbb=:b', { a: 123, b: 456 }) 或 ('aaa=? AND bbb=?', [ 123, 456 ])
    */
   public where(condition: string, values: DataRow | any[]): this;
-  /**
-   * 查询条件
-   * @param condition 表达式
-   */
-  public where(condition: Expression): this;
 
   public where(
-    condition: Partial<Q> | Pick<AdvancedCondition, keyof Q> | string | Expression,
+    condition: Expression | string | Partial<Q> | Partial<Pick<AdvancedCondition, keyof Q>>,
     values?: DataRow | any[],
   ): this {
     if (typeof condition === "string") {
@@ -320,14 +320,19 @@ export class QueryBuilder<Q = DataRow, R = any> {
 
   /**
    * 查询条件
-   * @param condition 键值对数据：{ aaa: 1, bbb: 22 })
+   * @param condition 表达式
    */
-  public and(condition: Partial<Q> | Pick<AdvancedCondition, keyof Q>): this;
+  public and(condition: Expression): this;
   /**
    * 查询条件
    * @param condition SQL 语句
    */
   public and(condition: string): this;
+  /**
+   * 查询条件
+   * @param condition 键值对数据：{ aaa: 1, bbb: 22 })
+   */
+  public and(condition: Partial<Q> | Partial<Pick<AdvancedCondition, keyof Q>>): this;
   /**
    * 查询条件
    * @param condition 模板字符串，可以为 ('aaa=:a AND bbb=:b', { a: 123, b: 456 })
@@ -338,14 +343,9 @@ export class QueryBuilder<Q = DataRow, R = any> {
    * @param condition 模板字符串，可以为 ('aaa=? AND bbb=?', [ 123, 456 ])
    */
   public and(condition: string, values: any[]): this;
-  /**
-   * 查询条件
-   * @param condition 表达式
-   */
-  public and(condition: Expression): this;
 
   public and(
-    condition: Partial<Q> | Pick<AdvancedCondition, keyof Q> | string | Expression,
+    condition: Expression | string | Partial<Q> | Partial<Pick<AdvancedCondition, keyof Q>>,
     values?: DataRow | any[],
   ): this {
     const t = typeof condition;
