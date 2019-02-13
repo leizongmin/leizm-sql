@@ -459,11 +459,6 @@ export class QueryBuilder<Q = DataRow, R = any> {
 
   /**
    * 更新
-   * @param update 键值对数据，如 { a: 123, b: 456 }
-   */
-  public set(update: Partial<Q> | Pick<AdvancedUpdate, keyof Q>): this;
-  /**
-   * 更新
    * @param update SQL 语句，如 a=a+1
    */
   public set(update: string): this;
@@ -479,8 +474,13 @@ export class QueryBuilder<Q = DataRow, R = any> {
    * @param values 模板参数，如 [ 123 ]
    */
   public set(update: string, values: any[]): this;
+  /**
+   * 更新
+   * @param update 键值对数据，如 { a: 123, b: 456 }
+   */
+  public set(update: Partial<Q> | Partial<Pick<AdvancedUpdate, keyof Q>>): this;
 
-  public set(update: Partial<Q> | Pick<AdvancedUpdate, keyof Q> | string, values?: DataRow | any[]): this {
+  public set(update: string | Partial<Q> | Partial<Pick<AdvancedUpdate, keyof Q>>, values?: DataRow | any[]): this {
     const t = typeof update;
     assert.ok(
       this._data.type === "UPDATE" || this._data.type === "INSERT_OR_UPDATE",

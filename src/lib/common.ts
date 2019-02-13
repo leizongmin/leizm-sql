@@ -76,7 +76,7 @@ export type AdvancedUpdateField =
       /** x = x - y */
       $decr?: number;
       /** x = y (y不做任何转义) */
-      $raw: string;
+      $raw?: string;
     };
 
 export type DataRow = Record<string, any>;
