@@ -723,7 +723,6 @@ export class QueryBuilder<Q = DataRow, R = any> {
     const currentTableEscapedName = data.tableNameEscaped!;
     data.conditions = data.conditions.map(v => v.trim()).filter(v => v);
     const where = data.conditions.length > 0 ? `WHERE ${data.conditions.join(" AND ")}` : "";
-    const limit = data.limit;
     let sql: string;
 
     assert.ok(currentTableName && currentTableEscapedName, "missing table name");
@@ -777,7 +776,7 @@ export class QueryBuilder<Q = DataRow, R = any> {
       }
       case "UPDATE": {
         assert.ok(data.update.length > 0, `update data connot be empty`);
-        const tail = utils.joinMultiString(where, limit);
+        const tail = utils.joinMultiString(where, data.orderBy, data.limit);
         sql = `UPDATE ${currentTableEscapedName} SET ${data.update.join(", ")} ${tail}`;
         break;
       }
@@ -786,7 +785,7 @@ export class QueryBuilder<Q = DataRow, R = any> {
         sql = `INSERT INTO ${currentTableEscapedName} ${data.insert} ON DUPLICATE KEY UPDATE ${data.update.join(", ")}`;
         break;
       case "DELETE": {
-        const tail = utils.joinMultiString(where, limit);
+        const tail = utils.joinMultiString(where, data.orderBy, data.limit);
         sql = `DELETE FROM ${currentTableEscapedName} ${tail}`;
         break;
       }

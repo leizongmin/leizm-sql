@@ -262,9 +262,10 @@ test("update", function() {
         a: 123,
         b: 456,
       })
+      .orderBy("a ASC")
       .build();
     utils.debug(sql);
-    expect(sql).to.equal("UPDATE `test1` SET `a`=123, `b`=456");
+    expect(sql).to.equal("UPDATE `test1` SET `a`=123, `b`=456 ORDER BY a ASC");
   }
   {
     const sql = Q.table("test1")
