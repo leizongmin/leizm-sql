@@ -44,7 +44,7 @@
   },
   "homepage": "https://github.com/leizongmin/leizm-sql#readme",
   "peerDependencies": {
-    "@types/node": "^10.12.1"
+    "@types/node": "*"
   },
   "devDependencies": {
     "@types/chai": "^4.1.7",
