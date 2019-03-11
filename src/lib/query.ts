@@ -405,12 +405,13 @@ export class QueryBuilder<Q = DataRow, R = any> {
 
   /**
    * 查询数量
-   * @param name 存储结果的字段名
+   * @param name 存储结果的字段名（默认`count`）
+   * @param field 执行 count 的字段（默认`*`）
    */
-  public count(name: string): this {
+  public count(name = "count", field = "*"): this {
     assert.ok(this._data.type === "", `cannot change query type after it was set to "${this._data.type}"`);
     this._data.type = "SELECT";
-    this._data.fields.push("COUNT(*) AS " + utils.sqlEscapeId(name));
+    this._data.fields.push(`COUNT(${field}) AS ${utils.sqlEscapeId(name)}`);
     return this;
   }
 
