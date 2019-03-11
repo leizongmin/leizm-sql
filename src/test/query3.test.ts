@@ -59,6 +59,28 @@ test("sub query", function() {
       "SELECT * FROM `test1` WHERE `a`=123 AND `b` IN (SELECT `id` FROM `test2` WHERE `id`<10 LIMIT 100)",
     );
   }
+  {
+    const sql = Q.select("*")
+      .from("test1")
+      .where({
+        a: 123,
+        $raw: "a > b",
+      })
+      .build();
+    utils.debug(sql);
+    expect(sql).to.equal("SELECT * FROM `test1` WHERE a > b AND `a`=123");
+  }
+  {
+    const sql = Q.select("*")
+      .from("test1")
+      .where({
+        a: 123,
+        $raw: "a > b",
+      })
+      .build();
+    utils.debug(sql);
+    expect(sql).to.equal("SELECT * FROM `test1` WHERE a > b AND `a`=123");
+  }
 });
 
 test("clone", function() {
