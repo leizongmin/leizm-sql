@@ -366,9 +366,9 @@ export class QueryBuilder<Q = DataRow, R = any> {
         // 如果是更改操作，检查 condition 不能为空
         assert.ok(Object.keys(condition).length > 0, `condition for modify operation cannot be empty`);
       }
-      if ((condition as any)["$raw"]) {
-        this._data.conditions.push((condition as any)["$raw"] as string);
-        delete (condition as any)["$raw"];
+      if (typeof condition === "object" && "$raw" in condition) {
+        this._data.conditions.push(condition["$raw"] as string);
+        delete condition["$raw"];
       }
       this._data.conditions = this._data.conditions.concat(utils.sqlConditionStrings(condition as any));
     }
