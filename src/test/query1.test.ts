@@ -226,6 +226,30 @@ test("count", function() {
     utils.debug(sql);
     expect(sql).to.equal("SELECT COUNT(*) AS `c` FROM `test1` WHERE `a`=456 AND `b`=789 LIMIT 1");
   }
+  {
+    const sql = Q.table("test1")
+      .count()
+      .where({
+        a: 456,
+        b: 789,
+      })
+      .limit(1)
+      .build();
+    utils.debug(sql);
+    expect(sql).to.equal("SELECT COUNT(*) AS `count` FROM `test1` WHERE `a`=456 AND `b`=789 LIMIT 1");
+  }
+  {
+    const sql = Q.table("test1")
+      .count("c", "DISTINCT `openid`")
+      .where({
+        a: 456,
+        b: 789,
+      })
+      .limit(1)
+      .build();
+    utils.debug(sql);
+    expect(sql).to.equal("SELECT COUNT(DISTINCT `openid`) AS `c` FROM `test1` WHERE `a`=456 AND `b`=789 LIMIT 1");
+  }
 });
 test("insert", function() {
   {

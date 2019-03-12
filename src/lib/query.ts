@@ -6,7 +6,7 @@
 
 import * as assert from "assert";
 import * as utils from "./utils";
-import { DataRow, QueryOptionsParams, AdvancedCondition, AdvancedUpdate } from "./common";
+import { DataRow, QueryOptionsParams, AdvancedCondition, AdvancedUpdate, RawCondition } from "./common";
 import { Expression } from "./expr";
 
 export class QueryBuilder<Q = DataRow, R = any> {
@@ -296,7 +296,7 @@ export class QueryBuilder<Q = DataRow, R = any> {
    * 查询条件
    * @param condition 键值对数据：{ aaa: 1, bbb: 22 })
    */
-  public where(condition: Partial<Q> | Partial<Pick<AdvancedCondition, keyof Q>>): this;
+  public where(condition: Partial<Q> | Partial<Pick<AdvancedCondition, keyof Q>> | RawCondition): this;
   /**
    * 查询条件
    * @param condition 模板字符串，可以为 ('aaa=:a AND bbb=:b', { a: 123, b: 456 }) 或 ('aaa=? AND bbb=?', [ 123, 456 ])
@@ -304,7 +304,7 @@ export class QueryBuilder<Q = DataRow, R = any> {
   public where(condition: string, values: DataRow | any[]): this;
 
   public where(
-    condition: Expression | string | Partial<Q> | Partial<Pick<AdvancedCondition, keyof Q>>,
+    condition: Expression | string | Partial<Q> | Partial<Pick<AdvancedCondition, keyof Q>> | RawCondition,
     values?: DataRow | any[],
   ): this {
     if (typeof condition === "string") {
@@ -332,7 +332,7 @@ export class QueryBuilder<Q = DataRow, R = any> {
    * 查询条件
    * @param condition 键值对数据：{ aaa: 1, bbb: 22 })
    */
-  public and(condition: Partial<Q> | Partial<Pick<AdvancedCondition, keyof Q>>): this;
+  public and(condition: Partial<Q> | Partial<Pick<AdvancedCondition, keyof Q>> | RawCondition): this;
   /**
    * 查询条件
    * @param condition 模板字符串，可以为 ('aaa=:a AND bbb=:b', { a: 123, b: 456 })
@@ -345,7 +345,7 @@ export class QueryBuilder<Q = DataRow, R = any> {
   public and(condition: string, values: any[]): this;
 
   public and(
-    condition: Expression | string | Partial<Q> | Partial<Pick<AdvancedCondition, keyof Q>>,
+    condition: Expression | string | Partial<Q> | Partial<Pick<AdvancedCondition, keyof Q>> | RawCondition,
     values?: DataRow | any[],
   ): this {
     const t = typeof condition;
@@ -365,6 +365,10 @@ export class QueryBuilder<Q = DataRow, R = any> {
       if (this._data.type !== "SELECT") {
         // 如果是更改操作，检查 condition 不能为空
         assert.ok(Object.keys(condition).length > 0, `condition for modify operation cannot be empty`);
+      }
+      if (typeof condition === "object" && "$raw" in condition) {
+        this._data.conditions.push(condition["$raw"] as string);
+        delete condition["$raw"];
       }
       this._data.conditions = this._data.conditions.concat(utils.sqlConditionStrings(condition as any));
     }
@@ -405,12 +409,13 @@ export class QueryBuilder<Q = DataRow, R = any> {
 
   /**
    * 查询数量
-   * @param name 存储结果的字段名
+   * @param name 存储结果的字段名（默认`count`）
+   * @param field 执行 count 的字段（默认`*`）
    */
-  public count(name: string): this {
+  public count(name = "count", field = "*"): this {
     assert.ok(this._data.type === "", `cannot change query type after it was set to "${this._data.type}"`);
     this._data.type = "SELECT";
-    this._data.fields.push("COUNT(*) AS " + utils.sqlEscapeId(name));
+    this._data.fields.push(`COUNT(${field}) AS ${utils.sqlEscapeId(name)}`);
     return this;
   }
 

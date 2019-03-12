@@ -35,6 +35,8 @@ export type BaseFieldType = number | string | boolean | Date | null;
 
 export type AdvancedCondition = Record<string | number | symbol, AdvancedConditionField>;
 
+export type RawCondition = { $raw?: string };
+
 export type AdvancedConditionField =
   | BaseFieldType
   | {
