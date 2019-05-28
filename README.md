@@ -33,7 +33,8 @@ npm install @leizm/sql --save
 ## 使用方法
 
 ```typescript
-import { table, expr } from "@leizm/sql";
+import { table, expr, query } from "@leizm/sql";
+import * as mysql from "mysql";
 
 // 普通查询
 table("test")
@@ -157,6 +158,17 @@ table("test")
   )
   .build();
 // SELECT * FROM `test` WHERE (a=123 OR `b`=456 AND `c` IN (789) OR d=666)
+
+// 快捷执行MySQL查询
+const conn = mysql.createConnection({});
+query(
+  conn,
+  table("test")
+    .select("*")
+    .limit(1),
+)
+  .then(ret => console.log(ret))
+  .catch(err => console.error(err));
 ```
 
 ## License

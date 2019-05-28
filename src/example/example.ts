@@ -1,4 +1,5 @@
-import { table, expr } from "../lib";
+import { table, expr, query } from "../lib";
+import * as mysql from "mysql";
 
 // 普通查询
 table("test")
@@ -121,3 +122,13 @@ table("test")
   )
   .build();
 // SELECT * FROM `test` WHERE (a=123 OR `b`=456 AND `c` IN (789) OR d=666)
+
+const conn = mysql.createConnection({});
+query(
+  conn,
+  table("test")
+    .select("*")
+    .limit(1),
+)
+  .then(ret => console.log(ret))
+  .catch(err => console.error(err));
