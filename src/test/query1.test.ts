@@ -278,6 +278,17 @@ test("insert", function() {
     utils.debug(sql);
     expect(sql).to.equal("INSERT INTO `test1` (`a`, `b`) VALUES (123, 456),\n(789, 110)");
   }
+  {
+    const sql = Q.table("test1")
+      .insert({
+        a: 123,
+        b: 456,
+      })
+      .ignore()
+      .build();
+    utils.debug(sql);
+    expect(sql).to.equal("INSERT IGNORE INTO `test1` (`a`, `b`) VALUES (123, 456)");
+  }
 });
 test("update", function() {
   {

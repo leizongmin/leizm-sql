@@ -75,6 +75,7 @@ export class QueryBuilder<Q = DataRow, R = any> {
     update: string[];
     insert: string;
     insertRows: number;
+    insertIgnore: boolean;
     delete: string;
     sql: string;
     sqlTpl: string;
@@ -108,6 +109,7 @@ export class QueryBuilder<Q = DataRow, R = any> {
       update: [],
       insert: "",
       insertRows: 0,
+      insertIgnore: false,
       delete: "",
       sql: "",
       sqlTpl: "",
@@ -546,6 +548,15 @@ export class QueryBuilder<Q = DataRow, R = any> {
   }
 
   /**
+   * 插入忽略已存在
+   */
+  public ignore(): this {
+    assert.ok(this._data.type === "INSERT", `onDuplicateKeyUpdate() must be called after insert()`);
+    this._data.insertIgnore = true;
+    return this;
+  }
+
+  /**
    * 删除
    */
   public delete(): this {
@@ -729,6 +740,7 @@ export class QueryBuilder<Q = DataRow, R = any> {
     data.conditions = data.conditions.map(v => v.trim()).filter(v => v);
     const where = data.conditions.length > 0 ? `WHERE ${data.conditions.join(" AND ")}` : "";
     let sql: string;
+    const ignore = data.insertIgnore ? " IGNORE" : "";
 
     assert.ok(currentTableName && currentTableEscapedName, "missing table name");
 
@@ -776,7 +788,7 @@ export class QueryBuilder<Q = DataRow, R = any> {
         break;
       }
       case "INSERT": {
-        sql = `INSERT INTO ${currentTableEscapedName} ${data.insert}`;
+        sql = `INSERT${ignore} INTO ${currentTableEscapedName} ${data.insert}`;
         break;
       }
       case "UPDATE": {
