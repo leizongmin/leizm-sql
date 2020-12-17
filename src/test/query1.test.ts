@@ -290,6 +290,34 @@ test("insert", function() {
     expect(sql).to.equal("INSERT IGNORE INTO `test1` (`a`, `b`) VALUES (123, 456)");
   }
 });
+test("replace", function() {
+  {
+    const sql = Q.table("test1")
+      .replace({
+        a: 123,
+        b: 456,
+      })
+      .build();
+    utils.debug(sql);
+    expect(sql).to.equal("REPLACE INTO `test1` (`a`, `b`) VALUES (123, 456)");
+  }
+  {
+    const sql = Q.table("test1")
+      .replace([
+        {
+          a: 123,
+          b: 456,
+        },
+        {
+          a: 789,
+          b: 110,
+        },
+      ])
+      .build();
+    utils.debug(sql);
+    expect(sql).to.equal("REPLACE INTO `test1` (`a`, `b`) VALUES (123, 456),\n(789, 110)");
+  }
+});
 test("update", function() {
   {
     const sql = Q.table("test1")

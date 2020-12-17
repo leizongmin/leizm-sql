@@ -519,6 +519,10 @@ export class QueryBuilder<Q = DataRow, R = any> {
   public insert(data: Array<Partial<Q>>): this;
 
   public insert(data: Partial<Q> | Array<Partial<Q>>): this {
+    return this._insert(data);
+  }
+
+  private _insert(data: Partial<Q> | Array<Partial<Q>>): this {
     assert.ok(this._data.type === "", `cannot change query type after it was set to "${this._data.type}"`);
     this._data.type = "INSERT";
     assert.ok(data, `missing data`);
@@ -553,6 +557,23 @@ export class QueryBuilder<Q = DataRow, R = any> {
   public ignore(): this {
     assert.ok(this._data.type === "INSERT", `onDuplicateKeyUpdate() must be called after insert()`);
     this._data.insertIgnore = true;
+    return this;
+  }
+
+  /**
+   * 替换，删除原来的记录，添加新的记录
+   * @param data 键值对数据
+   */
+  public replace(data: Partial<Q>): this;
+  /**
+   * 替换，删除原来的记录，添加新的记录
+   * @param data 键值对数据数组
+   */
+  public replace(data: Array<Partial<Q>>): this;
+
+  public replace(data: Partial<Q> | Array<Partial<Q>>): this {
+    this._insert(data);
+    this._data.type = "REPLACE";
     return this;
   }
 
@@ -789,6 +810,10 @@ export class QueryBuilder<Q = DataRow, R = any> {
       }
       case "INSERT": {
         sql = `INSERT${ignore} INTO ${currentTableEscapedName} ${data.insert}`;
+        break;
+      }
+      case "REPLACE": {
+        sql = `REPLACE INTO ${currentTableEscapedName} ${data.insert}`;
         break;
       }
       case "UPDATE": {
