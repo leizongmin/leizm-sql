@@ -555,7 +555,7 @@ export class QueryBuilder<Q = DataRow, R = any> {
    * 插入忽略已存在
    */
   public ignore(): this {
-    assert.ok(this._data.type === "INSERT", `onDuplicateKeyUpdate() must be called after insert()`);
+    assert.ok(this._data.type === "INSERT", `ignore() must be called after insert()`);
     this._data.insertIgnore = true;
     return this;
   }
