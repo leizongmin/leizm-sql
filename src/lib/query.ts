@@ -75,6 +75,7 @@ export class QueryBuilder<Q = DataRow, R = any> {
     update: string[];
     insert: string;
     insertRows: number;
+    insertIgnore: boolean;
     delete: string;
     sql: string;
     sqlTpl: string;
@@ -108,6 +109,7 @@ export class QueryBuilder<Q = DataRow, R = any> {
       update: [],
       insert: "",
       insertRows: 0,
+      insertIgnore: false,
       delete: "",
       sql: "",
       sqlTpl: "",
@@ -517,6 +519,10 @@ export class QueryBuilder<Q = DataRow, R = any> {
   public insert(data: Array<Partial<Q>>): this;
 
   public insert(data: Partial<Q> | Array<Partial<Q>>): this {
+    return this._insert(data);
+  }
+
+  private _insert(data: Partial<Q> | Array<Partial<Q>>): this {
     assert.ok(this._data.type === "", `cannot change query type after it was set to "${this._data.type}"`);
     this._data.type = "INSERT";
     assert.ok(data, `missing data`);
@@ -542,6 +548,32 @@ export class QueryBuilder<Q = DataRow, R = any> {
     }
     this._data.insert = `(${fields.join(", ")}) VALUES ${values.join(",\n")}`;
     this._data.insertRows = list.length;
+    return this;
+  }
+
+  /**
+   * 插入忽略已存在
+   */
+  public ignore(): this {
+    assert.ok(this._data.type === "INSERT", `ignore() must be called after insert()`);
+    this._data.insertIgnore = true;
+    return this;
+  }
+
+  /**
+   * 替换，删除原来的记录，添加新的记录
+   * @param data 键值对数据
+   */
+  public replace(data: Partial<Q>): this;
+  /**
+   * 替换，删除原来的记录，添加新的记录
+   * @param data 键值对数据数组
+   */
+  public replace(data: Array<Partial<Q>>): this;
+
+  public replace(data: Partial<Q> | Array<Partial<Q>>): this {
+    this._insert(data);
+    this._data.type = "REPLACE";
     return this;
   }
 
@@ -729,6 +761,7 @@ export class QueryBuilder<Q = DataRow, R = any> {
     data.conditions = data.conditions.map(v => v.trim()).filter(v => v);
     const where = data.conditions.length > 0 ? `WHERE ${data.conditions.join(" AND ")}` : "";
     let sql: string;
+    const ignore = data.insertIgnore ? " IGNORE" : "";
 
     assert.ok(currentTableName && currentTableEscapedName, "missing table name");
 
@@ -776,7 +809,11 @@ export class QueryBuilder<Q = DataRow, R = any> {
         break;
       }
       case "INSERT": {
-        sql = `INSERT INTO ${currentTableEscapedName} ${data.insert}`;
+        sql = `INSERT${ignore} INTO ${currentTableEscapedName} ${data.insert}`;
+        break;
+      }
+      case "REPLACE": {
+        sql = `REPLACE INTO ${currentTableEscapedName} ${data.insert}`;
         break;
       }
       case "UPDATE": {

@@ -86,6 +86,30 @@ table("test1")
 // INSERT INTO `test1` (`a`, `b`) VALUES (123, 456),
 // (789, 110)");
 
+// 插入数据，忽略已经存在记录
+table("test1")
+  .insert({ a: 123, b: 456 })
+  .ignore()
+  .build();
+// INSERT IGNORE INTO `test1` (`a`, `b`) VALUES (123, 456)
+
+// 插入数据，如果记录已经存在则改为更新
+table("test1")
+  .insert({ a: 123, b: 456 })
+  .onDuplicateKeyUpdate()
+  .set({ a: "xxx" })
+  .build();
+// INSERT INTO `test1` (`a`, `b`) VALUES (123, 456) ON DUPLICATE KEY UPDATE `a`='xxx'
+
+// 替换数据
+table("test1")
+  .replace({
+    a: 123,
+    b: 456,
+  })
+  .build();
+// REPLACE INTO `test1` (`a`, `b`) VALUES (123, 456);
+
 // 更新数据
 table("test1")
   .update({
@@ -98,14 +122,6 @@ table("test1")
   .limit(12)
   .build();
 // UPDATE `test1` SET `a`=123, `b`=456 WHERE `b`=777 LIMIT 12
-
-// 插入数据，如果记录已经存在则改为更新
-table("test1")
-  .insert({ a: 123, b: 456 })
-  .onDuplicateKeyUpdate()
-  .set({ a: "xxx" })
-  .build();
-// INSERT INTO `test1` (`a`, `b`) VALUES (123, 456) ON DUPLICATE KEY UPDATE `a`='xxx'
 
 // 删除数据
 table("test1")
